@@ -29,7 +29,7 @@ CREATE TABLE `taskdefinizioni` (
   `AssemblyPath` varchar(300) NOT NULL,
   `TaskClass` varchar(100) NOT NULL,
   `LogDir` varchar(250) NOT NULL,
-  `DataDir` varchar(250) NOT NULL,
+  `DatiDir` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `MostraConsole` tinyint NOT NULL DEFAULT '1',
   `TipoNotificaId` smallint NOT NULL,
   `MailFROM` text,
@@ -53,6 +53,9 @@ CREATE TABLE `taskdefinizioni` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `taskdefinizioni` */
+
+insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`DataInizio`,`DataFine`) values 
+(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,60,60,'2001-01-01','9999-12-31');
 
 /*Table structure for table `taskesecuzioni` */
 
@@ -82,6 +85,27 @@ CREATE TABLE `taskesecuzioni` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `taskesecuzioni` */
+
+/*Table structure for table `taskfiles` */
+
+DROP TABLE IF EXISTS `taskfiles`;
+
+CREATE TABLE `taskfiles` (
+  `Id` bigint NOT NULL AUTO_INCREMENT,
+  `TaskEsecuzioneId` bigint NOT NULL,
+  `TipoFileId` smallint NOT NULL,
+  `FileName` varchar(150) NOT NULL,
+  `FileData` longblob NOT NULL,
+  `DataInserimento` datetime NOT NULL,
+  `DataAggiornamento` datetime NOT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `TaskEsecuzioneId` (`TaskEsecuzioneId`),
+  KEY `TipoFileId` (`TipoFileId`),
+  CONSTRAINT `taskfiles_ibfk_1` FOREIGN KEY (`TaskEsecuzioneId`) REFERENCES `taskesecuzioni` (`Id`),
+  CONSTRAINT `taskfiles_ibfk_2` FOREIGN KEY (`TipoFileId`) REFERENCES `tasktipifile` (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `taskfiles` */
 
 /*Table structure for table `taskparametri` */
 
@@ -145,6 +169,9 @@ CREATE TABLE `tasksistemi` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `tasksistemi` */
+
+insert  into `tasksistemi`(`Id`,`Nome`) values 
+(1,'TEST');
 
 /*Table structure for table `taskstatiesecuzione` */
 
@@ -215,6 +242,30 @@ CREATE TABLE `tasktipitask` (
 insert  into `tasktipitask`(`Id`,`Nome`) values 
 (1,'Classe Interfaccia .NET'),
 (2,'Eseguibile esterno');
+
+/* Procedure structure for procedure `clean_db` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `clean_db` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `clean_db`()
+BEGIN
+
+ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 ;
+ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 ;
+ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' ;
+ SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 ;
+
+		truncate table taskfiles;
+		truncate table taskesecuzioni;
+		
+ SET SQL_MODE=@OLD_SQL_MODE ;
+ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS ;
+ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS ;
+ SET SQL_NOTES=@OLD_SQL_NOTES ;
+	END */$$
+DELIMITER ;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

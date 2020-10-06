@@ -26,14 +26,12 @@ namespace TaskManagement.DAL
         public abstract string Host { get; set; }
         public abstract string Pid { get; set; }
 
-        [AcceptNull]
         public abstract int ReturnCode { get; set; }
         
         [AcceptNull()]
         [MaxLength(65000)]
         public abstract string ReturnMessage { get; set; }
         
-        [AcceptNull]
         public abstract int NotificaCode { get; set; }
         
         [AcceptNull()]
@@ -48,6 +46,6 @@ namespace TaskManagement.DAL
         public abstract DateTime DataInserimento { get; }
 
         [AutoUpdateTimestamp]
-        public abstract DateTime DataAggiornamento { get; set; }
+        public abstract DateTime DataAggiornamento { get; }
     }
 }

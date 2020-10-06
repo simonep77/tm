@@ -21,6 +21,7 @@ namespace TaskManagement.BIZ.src
 
         public TaskService(BusinessSlot slot): base(slot)
         {
+            this.Slot.Conf.ObjectValidationUseMessageList = false;
             this.Slot.DB.AutoCloseConnection = true;
         }
 

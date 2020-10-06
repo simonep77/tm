@@ -8,14 +8,13 @@ namespace TaskManagement.DAL
     public abstract class TaskFile : DataObject<TaskFile>
     {
         public const string KEY_EXEC = @"KEY_EXEC";
-        [PrimaryKey]
+        [PrimaryKey, AutoIncrement]
         public abstract long Id { get; }
         [SearchKey(KEY_EXEC)]
         public abstract long TaskEsecuzioneId { get; set; }
      
         public abstract short TipoFileId { get; set; }
-        [MinLength(1)]
-        [MaxLength(150)]
+        [MinLength(1), MaxLength(150)]
         public abstract string FileName { get; set; }
         
         [LoadOnAccess()]

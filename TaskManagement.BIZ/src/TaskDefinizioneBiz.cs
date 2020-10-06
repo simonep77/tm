@@ -16,6 +16,7 @@ namespace TaskManagement.BIZ.src
 {
     public class TaskDefinizioneBiz:BusinessObject<TaskDefinizione>
     {
+        private Process mThisProcess = Process.GetCurrentProcess();
         private TaskEsecuzione mEsecuzione;
         public Lazy<TaskParametroLista> Parametri { get; }
 
@@ -25,11 +26,16 @@ namespace TaskManagement.BIZ.src
         }
 
 
+        private string getLogFileNameBase()
+        {
+            return $"{this.DataObj.Sistema.Nome.Replace(' ', '_')}_{this.DataObj.Nome.Replace(' ', '_')}";
+        }
+
 
         /// <summary>
         /// Registra avvio esecuzione
         /// </summary>
-        private void esecuzioneInizializza(ITaskTM task)
+        private void esecuzioneInizializzaTask(ITaskTM task)
         {
             task.Runtime.SysTaskClass = this.DataObj.TaskClass;
             task.Runtime.SysTaskId = this.DataObj.Id;
@@ -40,8 +46,9 @@ namespace TaskManagement.BIZ.src
             task.Runtime.SysTipoNotifica = this.DataObj.TipoNotificaId;
             task.Runtime.SysRiferimento = this.DataObj.Riferimento;
             task.Runtime.SysNote = this.DataObj.Note;
+            task.Runtime.TaskPID = this.mThisProcess.Id;
 
-            task.Runtime.LogFileName = Path.Combine(this.DataObj.LogDir, $"{this.DataObj.Sistema.Nome.Replace(' ', '_')}_{this.DataObj.Nome.Replace(' ', '_')}_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+            task.Runtime.LogFileName = Path.Combine(this.DataObj.LogDir, $"{this.getLogFileNameBase()}_{DateTime.Now:yyyyMMdd_HHmmss}.log");
             
             if (this.DataObj.TipoNotificaId == (int)ETipoNotificaEsito.Email)
             {
@@ -58,6 +65,11 @@ namespace TaskManagement.BIZ.src
             }
 
             task.Runtime.TaskStartDate = this.mEsecuzione.DataInserimento;
+
+            //Esegue le azioni propedeutiche all'avvio (creazione dirs)
+            Directory.CreateDirectory(this.DataObj.LogDir);
+            Directory.CreateDirectory(this.DataObj.DatiDir);
+
             task.Runtime.InitLogger();
         }
 
@@ -70,6 +82,7 @@ namespace TaskManagement.BIZ.src
             this.mEsecuzione.TaskDefId = this.DataObj.Id;
             this.mEsecuzione.StatoEsecuzioneId = (short)EStatoEsecuzione.InEsecuzione;
             this.mEsecuzione.Pid = Process.GetCurrentProcess().Id.ToString();
+            this.mEsecuzione.Host = Environment.MachineName;
             this.Slot.SaveObject(this.mEsecuzione);
         }
 
@@ -133,46 +146,13 @@ namespace TaskManagement.BIZ.src
         {
             var zipfile = Path.ChangeExtension(logFile, @".zip");
 
-            var zip = new ZipFile(zipfile);
-            var fi = new FileInfo(logFile);
-            var newEntry = new ZipEntry(ZipEntry.CleanName(fi.Name));
-            newEntry.DateTime = fi.LastWriteTime;
-            newEntry.Size = fi.Length;
-            zip.Add(newEntry);
-            zip.CommitUpdate();
-            zip.Close();
-
+            var zip = new FastZip();
+            zip.CreateZip(zipfile, Path.GetDirectoryName(logFile), false, Path.GetFileName(logFile));
+            
             //Elimina file log non zippato
             File.Delete(logFile);
 
 
-            //zip.Add(task.Runtime.Logger.Path, CompressionMethod.BZip2, )
-
-            //using (var fsOut = File.Create(zipfile))
-            //{
-            //    using (var zipStream = new ZipOutputStream(fsOut))
-            //    {
-            //        zipStream.SetLevel(9);       // 0-9, 9 being the highest level of compression
-            //        var fi = new FileInfo(task.Runtime.Logger.Path);
-            //        var newEntry = new ZipEntry(ZipEntry.CleanName(fi.Name));
-            //        newEntry.DateTime = fi.LastWriteTime;
-            //        newEntry.Size = fi.Length;
-            //        zipStream.PutNextEntry(newEntry);
-            //        try
-            //        {
-            //            using (var streamReader = File.OpenRead(inputFile))
-            //            {
-            //                CopiaStream(streamReader, zipStream);
-            //            }
-            //        }
-            //        finally
-            //        {
-            //            zipStream.CloseEntry();
-            //        }
-
-            //        zipStream.IsStreamOwner = true;
-            //    }
-            //}
         }
 
 
@@ -182,8 +162,7 @@ namespace TaskManagement.BIZ.src
                 return;
 
             var lstFiles = this.Slot.CreateList<TaskFileLista>()
-                .OrderBy(nameof(TaskFile.DataInserimento))
-                .SearchByColumn(Filter.Eq(nameof(TaskFile.TaskEsecuzioneId), this.DataObj.Id))
+                .CercaFilesPerTaskDefId(this.DataObj.Id)
                 .Skip(this.DataObj.MantieniNumLogDB);
 
             foreach (var f in lstFiles)
@@ -198,7 +177,8 @@ namespace TaskManagement.BIZ.src
             if (this.DataObj.MantieniNumLogFS <= 0)
                 return;
 
-            var lstFiles = Directory.GetFiles(this.DataObj.LogDir).OrderBy(f => new FileInfo(f).CreationTime).Skip(this.DataObj.MantieniNumLogFS);
+            var lstFiles = Directory.GetFiles(this.DataObj.LogDir, this.getLogFileNameBase() + "*")
+                .OrderByDescending(f => new FileInfo(f).CreationTime).Skip(this.DataObj.MantieniNumLogFS);
 
             foreach (var f in lstFiles)
             {
@@ -230,10 +210,9 @@ namespace TaskManagement.BIZ.src
                 this.esecuzioneAvvia();
 
                 //Inizializza
-                this.esecuzioneInizializza(task);
+                this.esecuzioneInizializzaTask(task);
 
                 //Aggancia metodi base per tracciamento
-                task.OnReportSegnalazione += SalvaSegnalazioneTask;
 
                 try
                 {
@@ -281,10 +260,6 @@ namespace TaskManagement.BIZ.src
 
         }
 
-        private void SalvaSegnalazioneTask(ITaskTM task, ETipoSegnalazione cond, string itemKey, string itemType, string text)
-        {
-            throw new NotImplementedException();
-        }
 
      
 

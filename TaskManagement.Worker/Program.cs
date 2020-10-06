@@ -10,34 +10,35 @@ namespace TaskManagement.Worker
 {
     public class Applicazione
     {
-        private static string TaskMainArg = string.Empty;
+        private static string taskMainArg = string.Empty;
+        private static Process thisProc = Process.GetCurrentProcess();
 
         [STAThread()]
         public static void Main(string[] args)
         {
             Console.WriteLine("*********************************************");
-            Console.WriteLine(" TASKWORKER - Applicazione esecuzione task");
+            Console.WriteLine($" {thisProc.ProcessName} - Applicazione esecuzione task");
             Console.WriteLine("*********************************************");
             try
             {
                 if (args.Length == 0)
                     throw new ArgumentException(@"Nessun parametro di avvio specificato");
 
-                TaskMainArg = args[0];
+                taskMainArg = args[0];
                 long lSchedPlanId = 0L;
 
                 var slot = new BusinessSlot(@"TmConnection");
                 var taskSvc = new TaskService(slot);
 
 
-                if (long.TryParse(TaskMainArg, out lSchedPlanId))
+                if (long.TryParse(taskMainArg, out lSchedPlanId))
                 {
                     throw new NotImplementedException(@"Schedulazione non ancora implementata");
                     //Poi lo implemento
                 }
                 else
                 {
-                    taskSvc.RunTaskByName(TaskMainArg);
+                    taskSvc.RunTaskByName(taskMainArg);
                 }
 
                 Environment.ExitCode = 0;
@@ -54,16 +55,15 @@ namespace TaskManagement.Worker
 
         private static void printException(Exception ex)
         {
-            var proc = Process.GetCurrentProcess();
             var logDir = string.IsNullOrWhiteSpace(Settings.Default.LogBaseDirectory) ? Path.GetTempPath() : Settings.Default.LogBaseDirectory;
 
             Directory.CreateDirectory(logDir);
 
-            using (var oLog = new FileLogger(Path.Combine(logDir, $"{proc.ProcessName}_Errors_{DateTime.Now:yyyy_MM}.log")))
+            using (var oLog = new FileLogger(Path.Combine(logDir, $"{thisProc.ProcessName}_Errors_{DateTime.Now:yyyy_MM}.log")))
             {
                 oLog.WriteLog("===================================================================================================");
-                oLog.WriteLog("TaskWorker PID: {0}", (object)Process.GetCurrentProcess().Id);
-                oLog.WriteLog("Nome Task     : {0}", TaskMainArg);
+                oLog.WriteLog($"{thisProc.ProcessName} PID: {thisProc.Id}");
+                oLog.WriteLog($"Nome Task     : {taskMainArg}");
                 oLog.WriteLog("Esecuzione terminata con errori.");
                 oLog.WriteLog(ex.Message);
             }
@@ -76,7 +76,7 @@ namespace TaskManagement.Worker
         /// <remarks></remarks>
         private static void printUsage()
         {
-            Console.WriteLine(typeof(Applicazione).Assembly.GetName().Name);
+            Console.WriteLine(thisProc.ProcessName);
             Console.WriteLine("<nometask> -> Deve contenre almeno un carattere non numerico -> esegue il task in modalità standalone");
             Console.WriteLine("oppure");
             Console.WriteLine("<schedule_plan_id> -> Solo numerico -> Esegue il task relativo alla schedulazione indicata");
