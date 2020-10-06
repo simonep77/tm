@@ -21,7 +21,7 @@ namespace TaskManagement.BIZ.src
 
         public TaskDefinizioneBiz(TaskDefinizione t) : base(t) {
             //Definizione Lazy load
-            this.Parametri = new Lazy<TaskParametroLista>(() => this.Slot.CreateList<TaskParametroLista>().SearchByColumn(Filter.Eq(nameof(TaskParametro.CodTask), this.DataObj.Id)));
+            this.Parametri = new Lazy<TaskParametroLista>(() => this.Slot.CreateList<TaskParametroLista>().SearchByColumn(Filter.Eq(nameof(TaskParametro.TaskDefId), this.DataObj.Id)));
         }
 
 
@@ -37,13 +37,13 @@ namespace TaskManagement.BIZ.src
             task.Runtime.SysDatiDir = this.DataObj.DatiDir;
             task.Runtime.SysLogDir = this.DataObj.LogDir;
             task.Runtime.SysSistema = this.DataObj.Sistema.Nome;
-            task.Runtime.SysTipoNotifica = this.DataObj.CodTipoNotifica;
+            task.Runtime.SysTipoNotifica = this.DataObj.TipoNotificaId;
             task.Runtime.SysRiferimento = this.DataObj.Riferimento;
             task.Runtime.SysNote = this.DataObj.Note;
 
             task.Runtime.LogFileName = Path.Combine(this.DataObj.LogDir, $"{this.DataObj.Sistema.Nome.Replace(' ', '_')}_{this.DataObj.Nome.Replace(' ', '_')}_{DateTime.Now:yyyyMMdd_HHmmss}.log");
             
-            if (this.DataObj.CodTipoNotifica == (int)ETipoNotificaEsito.Email)
+            if (this.DataObj.TipoNotificaId == (int)ETipoNotificaEsito.Email)
             {
                 task.Runtime.SysMailFROM = this.DataObj.TaskClass;
                 task.Runtime.SysMailTO = this.DataObj.TaskClass;
@@ -56,7 +56,8 @@ namespace TaskManagement.BIZ.src
             {
                 task.Runtime.UserParams.Add(item.Chiave, new ParametroItem(item.Chiave,item.Valore, item.Visibile));
             }
-            //task.Runtime.UserParams = this.DataObj.TaskClass;
+
+            task.Runtime.TaskStartDate = this.mEsecuzione.DataInserimento;
             task.Runtime.InitLogger();
         }
 
@@ -66,10 +67,9 @@ namespace TaskManagement.BIZ.src
         private void esecuzioneAvvia()
         {
             this.mEsecuzione = this.Slot.CreateObject<TaskEsecuzione>();
-            this.mEsecuzione.CodTask = this.DataObj.Id;
-            this.mEsecuzione.CodStatoEsecuzione = (short)EStatoEsecuzione.InEsecuzione;
-            this.mEsecuzione.DataAvvio = DateTime.Now;
-            this.mEsecuzione.Pid = Process.GetCurrentProcess().Id;
+            this.mEsecuzione.TaskDefId = this.DataObj.Id;
+            this.mEsecuzione.StatoEsecuzioneId = (short)EStatoEsecuzione.InEsecuzione;
+            this.mEsecuzione.Pid = Process.GetCurrentProcess().Id.ToString();
             this.Slot.SaveObject(this.mEsecuzione);
         }
 
@@ -79,7 +79,7 @@ namespace TaskManagement.BIZ.src
         private void esecuzioneRegistraFine(int code, string message)
         {
             this.mEsecuzione.DataTermine = DateTime.Now;
-            this.mEsecuzione.CodStatoEsecuzione = (short)EStatoEsecuzione.Terminato;
+            this.mEsecuzione.StatoEsecuzioneId = (short)EStatoEsecuzione.Terminato;
             this.mEsecuzione.ReturnCode = code;
             this.mEsecuzione.ReturnMessage = message;
             this.Slot.SaveObject(this.mEsecuzione);
@@ -88,7 +88,7 @@ namespace TaskManagement.BIZ.src
 
         private void esecuzioneEseguiNotifica(string logFile)
         {
-            if (this.DataObj.CodTipoNotifica == (int)ETipoNotificaEsito.Nessuna)
+            if (this.DataObj.TipoNotificaId == (int)ETipoNotificaEsito.Nessuna)
                 return;
 
             //Invia email
@@ -98,7 +98,7 @@ namespace TaskManagement.BIZ.src
                 var rctext = rc.ToString().ToUpper();
 
                 var subj = $"{rctext} - {this.DataObj.Sistema.Nome} {this.DataObj.Nome} ";
-                var body = $"Elaborazione avviata alle { this.mEsecuzione.DataAvvio:dd/MM/yyyy HH:mm:ss} e conclusa alle {this.mEsecuzione.DataTermine:dd/MM/yyyy HH:mm:ss}";
+                var body = $"Elaborazione avviata alle { this.mEsecuzione.DataInserimento:dd/MM/yyyy HH:mm:ss} e conclusa alle {this.mEsecuzione.DataTermine:dd/MM/yyyy HH:mm:ss}";
 
                 Mailer.Send(this.DataObj.MailFROM, this.DataObj.MailTO, this.DataObj.MailCC, this.DataObj.MailBCC, subj, body, logFile);
             }
@@ -120,8 +120,8 @@ namespace TaskManagement.BIZ.src
         private void esecuzioneCaricaLogFile(string logFile)
         {
             var log = this.Slot.CreateObject<TaskFile>();
-            log.CodTaskEsecuzione = this.mEsecuzione.Id;
-            log.CodTipoFile = 1;
+            log.TaskEsecuzioneId = this.mEsecuzione.Id;
+            log.TipoFileId = 1;
             log.FileName = Path.GetFileName(logFile);
             log.FileData = File.ReadAllBytes(logFile);
 
@@ -183,7 +183,7 @@ namespace TaskManagement.BIZ.src
 
             var lstFiles = this.Slot.CreateList<TaskFileLista>()
                 .OrderBy(nameof(TaskFile.DataInserimento))
-                .SearchByColumn(Filter.Eq(nameof(TaskFile.CodTaskEsecuzione), this.DataObj.Id))
+                .SearchByColumn(Filter.Eq(nameof(TaskFile.TaskEsecuzioneId), this.DataObj.Id))
                 .Skip(this.DataObj.MantieniNumLogDB);
 
             foreach (var f in lstFiles)
@@ -226,14 +226,15 @@ namespace TaskManagement.BIZ.src
                 //Crea istanza nell'altro dominio
                 var task = (ITaskTM)appDom.CreateInstanceFromAndUnwrap(this.DataObj.AssemblyPath, this.DataObj.TaskClass);
 
+                //Crea avvio esecuzione DB
+                this.esecuzioneAvvia();
+
                 //Inizializza
                 this.esecuzioneInizializza(task);
 
                 //Aggancia metodi base per tracciamento
                 task.OnReportSegnalazione += SalvaSegnalazioneTask;
 
-                //Crea avvio esecuzione
-                this.esecuzioneAvvia();
                 try
                 {
                     //Deve inizializzare i parametri di runtime del task

@@ -53,6 +53,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TaskManagement.Common\TaskManagement.Common.csproj">
+      <Project>{664a5335-1d37-4170-bd1e-b8ca6bdc00d1}</Project>
+      <Name>TaskManagement.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TaskManagement.Interface\TaskManagement.Interface.csproj">
       <Project>{7977e313-49a4-4f79-abbe-a8fda1ecee88}</Project>
       <Name>TaskManagement.Interface</Name>

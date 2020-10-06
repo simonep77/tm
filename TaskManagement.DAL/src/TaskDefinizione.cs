@@ -16,15 +16,15 @@ namespace TaskManagement.DAL
         [MaxLength(50)]
         [SearchKey(KEY_NOME)]
         public abstract string Nome { get; set; }
-        public abstract short CodSistema { get; set; }
+        public abstract short SistemaId { get; set; }
 
-        [PropertyMap(nameof(CodSistema))]
+        [PropertyMap(nameof(SistemaId))]
         public abstract TaskSistema Sistema { get; }
 
-        public abstract byte Attivo { get; set; }
-        public abstract short CodTipoTask { get; set; }
+        public abstract sbyte Attivo { get; set; }
+        public abstract short TipoTaskId { get; set; }
         
-        [PropertyMap(nameof(CodTipoTask))]
+        [PropertyMap(nameof(TipoTaskId))]
         public abstract TaskTipo TipoTask { get; }
         [MinLength(1)]
         [MaxLength(300)]
@@ -39,7 +39,7 @@ namespace TaskManagement.DAL
         [MaxLength(250)]
         public abstract string DatiDir { get; set; }
         public abstract bool MostraConsole { get; set; }
-        public abstract short CodTipoNotifica { get; set; }
+        public abstract short TipoNotificaId { get; set; }
         [AcceptNull()]
         [MaxLength(50)]
         public abstract string MailFROM { get; set; }

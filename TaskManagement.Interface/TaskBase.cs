@@ -31,7 +31,6 @@ namespace TaskInterfaceLib
             try
             {
                 //Prevalorizzazioni varie..
-                this.Runtime.TaskStartDate = DateTime.Now;
                 this.Runtime.TaskLastReturnCode = (int)ETaskReturnCode.OK;
 
                 //Scrive inizio

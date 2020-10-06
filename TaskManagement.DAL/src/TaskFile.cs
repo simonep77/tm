@@ -7,16 +7,24 @@ namespace TaskManagement.DAL
     [Table("TaskFiles")]
     public abstract class TaskFile : DataObject<TaskFile>
     {
-        [PrimaryKey()]
-        public abstract long CodTaskEsecuzione { get; set; }
-        [PrimaryKey()]
-        public abstract short CodTipoFile { get; set; }
+        public const string KEY_EXEC = @"KEY_EXEC";
+        [PrimaryKey]
+        public abstract long Id { get; }
+        [SearchKey(KEY_EXEC)]
+        public abstract long TaskEsecuzioneId { get; set; }
+     
+        public abstract short TipoFileId { get; set; }
         [MinLength(1)]
         [MaxLength(150)]
         public abstract string FileName { get; set; }
+        
         [LoadOnAccess()]
         public abstract byte[] FileData { get; set; }
-        public abstract DateTime DataInserimento { get; set; }
-        public abstract DateTime DataAggiornamento { get; set; }
+
+        [AutoInsertTimestamp]
+        public abstract DateTime DataInserimento { get; }
+
+        [AutoUpdateTimestamp]
+        public abstract DateTime DataAggiornamento { get; }
     }
 }

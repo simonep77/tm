@@ -10,34 +10,44 @@ namespace TaskManagement.DAL
         [PrimaryKey()]
         [AutoIncrement()]
         public abstract long Id { get; }
-        public abstract int CodTask { get; set; }
+        public abstract int TaskDefId { get; set; }
 
-        [PropertyMap(nameof(CodTask))]
+        [PropertyMap(nameof(TaskDefId))]
         public abstract TaskDefinizione Task { get; }
+
+        [AcceptNull]
+        public abstract long SchedPianoId { get; set; }
+
+
+        public abstract short StatoEsecuzioneId { get; set; }
+        
         [MinLength(1)]
-        [MaxLength(32)]
-        public abstract string TaskExecId { get; set; }
-        public abstract short CodStatoEsecuzione { get; set; }
-        [MinLength(1)]
-        [MaxLength(50)]
+        [MaxLength(100)]
         public abstract string Host { get; set; }
-        public abstract int Pid { get; set; }
+        public abstract string Pid { get; set; }
+
+        [AcceptNull]
         public abstract int ReturnCode { get; set; }
+        
         [AcceptNull()]
-        [MaxLength(500)]
+        [MaxLength(65000)]
         public abstract string ReturnMessage { get; set; }
+        
+        [AcceptNull]
         public abstract int NotificaCode { get; set; }
+        
         [AcceptNull()]
-        [MaxLength(500)]
+        [MaxLength(65000)]
         public abstract string NotificaMessage { get; set; }
-        public abstract DateTime DataAvvio { get; set; }
+
+
         [AcceptNull()]
         public abstract DateTime DataTermine { get; set; }
-        [AcceptNull()]
-        public abstract long ParentId { get; set; }
-        [AcceptNull()]
-        public abstract int SchedId { get; set; }
-        public abstract DateTime DataInserimento { get; set; }
+
+        [AutoInsertTimestamp]
+        public abstract DateTime DataInserimento { get; }
+
+        [AutoUpdateTimestamp]
         public abstract DateTime DataAggiornamento { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace TaskManagement.DAL
     public abstract class TaskParametro : DataObject<TaskParametro>
     {
         [PrimaryKey()]
-        public abstract int CodTask { get; set; }
+        public abstract int TaskDefId { get; set; }
         [PrimaryKey()]
         [MinLength(1)]
         [MaxLength(50)]

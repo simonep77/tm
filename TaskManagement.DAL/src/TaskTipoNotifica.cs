@@ -9,7 +9,7 @@ namespace TaskManagement.DAL
         [PrimaryKey()]
         public abstract short Id { get; }
         [MinLength(1)]
-        [MaxLength(50)]
+        [MaxLength(100)]
         public abstract string Nome { get; }
     }
 }
