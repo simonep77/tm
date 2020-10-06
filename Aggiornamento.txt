@@ -1,3 +1,0 @@
-taskdef: add NumLogDB, NumLogFS, CodTipoTask (+FK a tab)
-taskexec: add SchedId, ParentId; elimina TaskExecId
-
