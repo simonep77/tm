@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E425A3AB-0B56-468B-A87D-32A6EED3C58A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TaskManagement.DAL</RootNamespace>
+    <AssemblyName>TaskManagement.DAL</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Business.Data.Objects, Version=4.0.0.0, Culture=neutral, PublicKeyToken=1dc0a08b888e7d1a, processorArchitecture=MSIL">
+      <HintPath>..\packages\bdo.4.0.7\lib\net20\Business.Data.Objects.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\TaskDefinizioneLista.cs" />
+    <Compile Include="src\TaskEsecuzioneLista.cs" />
+    <Compile Include="src\TaskFileLista.cs" />
+    <Compile Include="src\TaskJobDefinizioneLista.cs" />
+    <Compile Include="src\TaskParametroLista.cs" />
+    <Compile Include="src\TaskSchedulazioneLista.cs" />
+    <Compile Include="src\TaskSistemaLista.cs" />
+    <Compile Include="src\TaskStatoEsecuzioneLista.cs" />
+    <Compile Include="src\TaskTipoFileLista.cs" />
+    <Compile Include="src\TaskTipoNotificaLista.cs" />
+    <Compile Include="src\TaskTipoLista.cs" />
+    <Compile Include="src\TaskDefinizione.cs" />
+    <Compile Include="src\TaskEsecuzione.cs" />
+    <Compile Include="src\TaskFile.cs" />
+    <Compile Include="src\TaskJobDefinizione.cs" />
+    <Compile Include="src\TaskParametro.cs" />
+    <Compile Include="src\TaskSchedulazione.cs" />
+    <Compile Include="src\TaskSistema.cs" />
+    <Compile Include="src\TaskStatoEsecuzione.cs" />
+    <Compile Include="src\TaskTipoFile.cs" />
+    <Compile Include="src\TaskTipoNotifica.cs" />
+    <Compile Include="src\TaskTipo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

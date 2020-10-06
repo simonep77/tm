@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TaskWorker</name>
+    </assembly>
+    <members>
+        <member name="T:TaskWorker.My.Resources.Resources">
+            <summary>
+            Classe di risorse fortemente tipizzata per la ricerca di stringhe localizzate e così via.
+            </summary>
+        </member>
+        <member name="P:TaskWorker.My.Resources.Resources.ResourceManager">
+            <summary>
+            Restituisce l'istanza di ResourceManager nella cache utilizzata da questa classe.
+            </summary>
+        </member>
+        <member name="P:TaskWorker.My.Resources.Resources.Culture">
+            <summary>
+            Esegue l'override della proprietà CurrentUICulture del thread corrente per tutte le
+            ricerche di risorse eseguite utilizzando questa classe di risorse fortemente tipizzata.
+            </summary>
+        </member>
+        <member name="M:TaskWorker.Applicazione.printUsage">
+            <summary>
+            Visualizza messaggio
+            </summary>
+            <remarks></remarks>
+        </member>
+        <member name="M:TaskWorker.Applicazione.CreateZipArchive(System.String,System.String)">
+            <summary>
+            Esegue compressione del file
+            </summary>
+            <param name="inputFile"></param>
+            <param name="outPathname"></param>
+            <remarks></remarks>
+        </member>
+        <member name="M:TaskWorker.Applicazione.CopiaStream(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            Copia il contenuto di uno stream su un altro stream
+            </summary>
+            <param name="input"></param>
+            <param name="output"></param>
+            <returns></returns>
+            <remarks></remarks>
+        </member>
+    </members>
+</doc>
