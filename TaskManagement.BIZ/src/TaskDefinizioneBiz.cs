@@ -194,17 +194,19 @@ namespace TaskManagement.BIZ.src
             var retMsg = string.Empty;
             //Crea info di dominio
             var domSetup = new AppDomainSetup();
-            domSetup.ShadowCopyFiles = @"true";
             domSetup.ApplicationBase = Path.GetDirectoryName(this.DataObj.AssemblyPath);
             domSetup.ApplicationName = this.DataObj.TaskClass;
             domSetup.PrivateBinPath = domSetup.ApplicationBase;
+            domSetup.ShadowCopyFiles = @"true";
             //domSetup.ShadowCopyDirectories = "";
+            domSetup.CachePath = @"C:\WORK\TaskManData";
 
             var appDom = AppDomain.CreateDomain(@"tmDomain", null, domSetup);
             try
             {
                 //Crea istanza nell'altro dominio
-                var task = (ITaskTM)appDom.CreateInstanceFromAndUnwrap(this.DataObj.AssemblyPath, this.DataObj.TaskClass);
+                //var task = (ITaskTM)appDom.CreateInstanceFromAndUnwrap(this.DataObj.AssemblyPath, this.DataObj.TaskClass);
+                var task = (ITaskTM)appDom.CreateInstanceAndUnwrap(Path.GetFileNameWithoutExtension(this.DataObj.AssemblyPath), this.DataObj.TaskClass);
 
                 //Crea avvio esecuzione DB
                 this.esecuzioneAvvia();
