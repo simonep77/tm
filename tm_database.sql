@@ -55,7 +55,7 @@ CREATE TABLE `taskdefinizioni` (
 /*Data for the table `taskdefinizioni` */
 
 insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`DataInizio`,`DataFine`) values 
-(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,60,60,'2001-01-01','9999-12-31');
+(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,'2001-01-01','9999-12-31');
 
 /*Table structure for table `taskesecuzioni` */
 
