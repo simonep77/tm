@@ -17,6 +17,8 @@ namespace TaskManagement.DAL
 
         [AcceptNull]
         public abstract long SchedPianoId { get; set; }
+        [AcceptNull]
+        public abstract long JobEsecuzioneId { get; set; }
 
 
         public abstract short StatoEsecuzioneId { get; set; }

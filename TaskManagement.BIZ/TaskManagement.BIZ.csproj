@@ -47,8 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\ConsoleHelper.cs" />
     <Compile Include="src\Mailer.cs" />
     <Compile Include="src\TaskDefinizioneBiz.cs" />
+    <Compile Include="src\TaskJob.cs" />
     <Compile Include="src\TaskService.cs" />
   </ItemGroup>
   <ItemGroup>

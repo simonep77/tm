@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Proxies;
 using TaskManagement.Common;
 using TaskManagement.DAL;
 using TaskManagement.Interface;
@@ -18,12 +16,28 @@ namespace TaskManagement.BIZ.src
     {
         private Process mThisProcess = Process.GetCurrentProcess();
         private TaskEsecuzione mEsecuzione;
+
+        /// <summary>
+        /// Ottiene o imposta l'id del job di riferimento che ha originato l'esecuzione richiesta e che verra' registrato nell'esecuzione corrente
+        /// </summary>
+        public long ParentJobEsecuzioneId { get; set; }
+        
+        /// <summary>
+        /// Ottiene o imposta il piano di schedulazione che ha originato l'esecuzione corrente
+        /// </summary>
+        public long PianoSchedulazioneId { get; set; }
+        public TaskEsecuzione UltimaEsecuzione { get { return this.mEsecuzione; } }
         public Lazy<TaskParametroLista> Parametri { get; }
+        public Lazy<TaskDettaglioJobLista> DettagliJob { get; }
 
         public TaskDefinizioneBiz(TaskDefinizione t) : base(t) {
             //Definizione Lazy load
             this.Parametri = new Lazy<TaskParametroLista>(() => this.Slot.CreateList<TaskParametroLista>().SearchByColumn(Filter.Eq(nameof(TaskParametro.TaskDefId), this.DataObj.Id)));
+            this.DettagliJob = new Lazy<TaskDettaglioJobLista>(() => this.Slot.CreateList<TaskDettaglioJobLista>()
+                                                                                .OrderBy(nameof(TaskDettaglioJob.Progressivo), OrderVersus.Asc)
+                                                                                .SearchByColumn(Filter.Eq(nameof(TaskDettaglioJob.JobTaskDefId), this.DataObj.Id)));
         }
+
 
 
         private string getLogFileNameBase()
@@ -73,6 +87,14 @@ namespace TaskManagement.BIZ.src
 
             //Inizializza
             task.Init();
+
+            //Se necessario imposta la visibilita' della console
+            // if (!this.DataObj.MostraConsole)
+            if (this.ParentJobEsecuzioneId == 0L)
+            {
+                Console.Title = $"{this.DataObj.Sistema.Nome} - {this.DataObj.Nome} (PID: {this.mThisProcess.Id})";
+                ConsoleHelper.SetVisible(Console.Title, this.DataObj.MostraConsole);
+            }
         }
 
         /// <summary>
@@ -85,6 +107,8 @@ namespace TaskManagement.BIZ.src
             this.mEsecuzione.StatoEsecuzioneId = (short)EStatoEsecuzione.InEsecuzione;
             this.mEsecuzione.Pid = Process.GetCurrentProcess().Id.ToString();
             this.mEsecuzione.Host = Environment.MachineName;
+            this.mEsecuzione.JobEsecuzioneId = this.ParentJobEsecuzioneId;//Eventuale dipendenza da job in esecuzione
+            this.mEsecuzione.SchedPianoId = this.PianoSchedulazioneId;//Eventuale dipendenza da job in esecuzione
             this.Slot.SaveObject(this.mEsecuzione);
         }
 
@@ -208,18 +232,11 @@ namespace TaskManagement.BIZ.src
 
                 case (int)ETipoTask.TaskExecPgm:
                     return new Tuple<ITaskTM, AppDomain>(new TaskExecProgram(), null);
+                case (int)ETipoTask.TaskJob:
+                    return new Tuple<ITaskTM, AppDomain>(new TaskJob(this), null);
                 default:
                     throw new NotImplementedException($"tipo di task {this.DataObj.TipoTaskId} non implementato");
             }
-        }
-
-
-        public static int GetObjectAppDomain(object proxy)
-        {
-            RealProxy rp = RemotingServices.GetRealProxy(proxy);
-
-            int id = (int)rp.GetType().GetField("_domainID", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(rp);
-            return id;
         }
 
 

@@ -1,5 +1,5 @@
 /*
-SQLyog Community v13.1.6 (64 bit)
+SQLyog Community v13.1.7 (64 bit)
 MySQL - 8.0.21 : Database - task_management
 *********************************************************************
 */
@@ -55,7 +55,32 @@ CREATE TABLE `taskdefinizioni` (
 /*Data for the table `taskdefinizioni` */
 
 insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`DataInizio`,`DataFine`) values 
-(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,'2001-01-01','9999-12-31');
+(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,'2001-01-01','9999-12-31'),
+(2,'TaskNetstat',1,1,2,'netstat.exe','-ano','C:\\WORK\\TaskManData\\Log\\TaskEsterno','C:\\WORK\\TaskManData\\Dati\\TaskEsterno',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,'2001-01-01','9999-12-31');
+
+/*Table structure for table `taskdettaglijob` */
+
+DROP TABLE IF EXISTS `taskdettaglijob`;
+
+CREATE TABLE `taskdettaglijob` (
+  `Id` int NOT NULL AUTO_INCREMENT,
+  `JobTaskDefId` int NOT NULL,
+  `SubTaskDefId` int NOT NULL,
+  `Progressivo` int NOT NULL,
+  `AbilitaNotifiche` tinyint NOT NULL DEFAULT '0',
+  `Attivo` tinyint NOT NULL DEFAULT '1',
+  `MinPredReturnCode` smallint NOT NULL DEFAULT '999' COMMENT 'Indica il return code minimo del predecessore per potersi avviare',
+  `Asincrono` tinyint NOT NULL DEFAULT '0',
+  `DataInizio` date NOT NULL DEFAULT '2001-01-01',
+  `DataFine` date NOT NULL DEFAULT '9999-12-31',
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `JobTaskDefId` (`JobTaskDefId`,`Progressivo`),
+  KEY `SubTaskDefId` (`SubTaskDefId`),
+  CONSTRAINT `taskdettaglijob_ibfk_1` FOREIGN KEY (`JobTaskDefId`) REFERENCES `taskdefinizioni` (`Id`),
+  CONSTRAINT `taskdettaglijob_ibfk_2` FOREIGN KEY (`SubTaskDefId`) REFERENCES `taskdefinizioni` (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `taskdettaglijob` */
 
 /*Table structure for table `taskesecuzioni` */
 
@@ -128,14 +153,13 @@ DROP TABLE IF EXISTS `taskschedulazioni`;
 
 CREATE TABLE `taskschedulazioni` (
   `Id` int NOT NULL AUTO_INCREMENT,
-  `TaskDefId` int NOT NULL COMMENT 'Definizione del task da eseguire',
+  `Nome` varchar(200) NOT NULL COMMENT 'Descrizione della scheduazione',
   `Attivo` tinyint NOT NULL DEFAULT '1',
   `CronString` varchar(100) NOT NULL COMMENT 'Stringa cron con il dettaglio della schedulazione',
   `Host` varchar(150) DEFAULT NULL COMMENT 'Eventuale nome host su cui è vincolata l''esecuzione',
-  `SubTaskDefList` varchar(150) DEFAULT NULL COMMENT 'Eventuali task da eseguire in successione a quello corrente separati da , o ;',
+  `Note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT 'Note sulla schedulazione',
   PRIMARY KEY (`Id`),
-  KEY `TaskDefId` (`TaskDefId`),
-  CONSTRAINT `taskschedulazioni_ibfk_1` FOREIGN KEY (`TaskDefId`) REFERENCES `taskdefinizioni` (`Id`)
+  KEY `TaskDefId` (`Nome`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `taskschedulazioni` */
