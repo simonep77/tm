@@ -1,9 +1,13 @@
 ﻿using Bdo.Objects;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Proxies;
 using TaskManagement.Common;
 using TaskManagement.DAL;
 using TaskManagement.Interface;
@@ -35,6 +39,7 @@ namespace TaskManagement.BIZ.src
         {
             task.Runtime.SysTaskClass = this.DataObj.TaskClass;
             task.Runtime.SysTaskId = this.DataObj.Id;
+            task.Runtime.SysTaskType = this.DataObj.TipoTask.Nome;
             task.Runtime.SysAssemblyPath = this.DataObj.AssemblyPath;
             task.Runtime.SysDatiDir = this.DataObj.DatiDir;
             task.Runtime.SysLogDir = this.DataObj.LogDir;
@@ -184,26 +189,53 @@ namespace TaskManagement.BIZ.src
         }
 
 
-        
+        private Tuple<ITaskTM, AppDomain> esecuzioneIstanziaTipoTask()
+        {
+            switch (this.DataObj.TipoTaskId)
+            {
+                case (int)ETipoTask.TaskClass:
+                    //Crea nuovo dominio di esecuzione
+                    var domSetup = new AppDomainSetup();
+                    domSetup.ApplicationBase = Path.GetDirectoryName(this.DataObj.AssemblyPath);
+                    domSetup.ApplicationName = this.DataObj.TaskClass;
+                    domSetup.PrivateBinPath = domSetup.ApplicationBase;
+                    domSetup.ShadowCopyFiles = @"true";
+                    //domSetup.ShadowCopyDirectories = "";
+
+                    var appDom = AppDomain.CreateDomain(@"tmDomain", null, domSetup);
+                    var task = (ITaskTM)appDom.CreateInstanceAndUnwrap(Path.GetFileNameWithoutExtension(this.DataObj.AssemblyPath), this.DataObj.TaskClass);
+                    return new Tuple<ITaskTM, AppDomain>(task, appDom);
+
+                case (int)ETipoTask.TaskExecPgm:
+                    return new Tuple<ITaskTM, AppDomain>(new TaskExecProgram(), null);
+                default:
+                    throw new NotImplementedException($"tipo di task {this.DataObj.TipoTaskId} non implementato");
+            }
+        }
+
+
+        public static int GetObjectAppDomain(object proxy)
+        {
+            RealProxy rp = RemotingServices.GetRealProxy(proxy);
+
+            int id = (int)rp.GetType().GetField("_domainID", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(rp);
+            return id;
+        }
+
+
         public void Run()
         {
             var retCode = 0;
             var retMsg = string.Empty;
-            //Crea info di dominio
-            var domSetup = new AppDomainSetup();
-            domSetup.ApplicationBase = Path.GetDirectoryName(this.DataObj.AssemblyPath);
-            domSetup.ApplicationName = this.DataObj.TaskClass;
-            domSetup.PrivateBinPath = domSetup.ApplicationBase;
-            domSetup.ShadowCopyFiles = @"true";
-            //domSetup.ShadowCopyDirectories = "";
-            domSetup.CachePath = @"C:\WORK\TaskManData";
+            ITaskTM task = null;
+            AppDomain domain = null;
 
-            var appDom = AppDomain.CreateDomain(@"tmDomain", null, domSetup);
             try
             {
                 //Crea istanza nell'altro dominio
-                //var task = (ITaskTM)appDom.CreateInstanceFromAndUnwrap(this.DataObj.AssemblyPath, this.DataObj.TaskClass);
-                var task = (ITaskTM)appDom.CreateInstanceAndUnwrap(Path.GetFileNameWithoutExtension(this.DataObj.AssemblyPath), this.DataObj.TaskClass);
+                var tupla = this.esecuzioneIstanziaTipoTask();
+                task = tupla.Item1;
+                domain = tupla.Item2;
 
                 //Crea avvio esecuzione DB
                 this.esecuzioneAvvia();
@@ -254,7 +286,8 @@ namespace TaskManagement.BIZ.src
             }
             finally
             {
-                AppDomain.Unload(appDom);
+                if(domain != null)
+                    AppDomain.Unload(domain);
             }
 
         }

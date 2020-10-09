@@ -14,8 +14,6 @@ namespace TaskManagement.Interface
         private ILogger mLogger;
         public ITaskRunTimeInfo Runtime { get; } = new TaskRuntimeInfo();
 
-        public event TaskEvents.OnProgressEventHandler OnReportProgress;
-        public event TaskEvents.OnTaskSegnalazione OnReportSegnalazione;
 
 
         protected abstract bool CheckUserParams();
@@ -192,7 +190,6 @@ namespace TaskManagement.Interface
         {
             this.Runtime.Segnalazioni.Add(new TaskSegnalazione() { Tipo = (int)tipo, ChiaveEntita= chiaveEntita, TipoEntita= tipoEntita, Testo= testo });
             this.WriteLog($"Segnalazione {tipo} - {tipoEntita} - {chiaveEntita} - {testo}");
-            this.OnReportSegnalazione?.Invoke(this, tipo, chiaveEntita, tipoEntita, testo);
         }
 
         /// <summary>
@@ -204,8 +201,7 @@ namespace TaskManagement.Interface
         /// <param name="text"></param>
         protected void ReportProgress(int item, int total)
         {
-            WriteLog(" ** Avanzamento: {0} di {1}", item, total);
-            this.OnReportProgress?.Invoke(this, item, total);
+            WriteLog($" ** Avanzamento: {item} di {total}");
         }
 
 
@@ -235,48 +231,46 @@ namespace TaskManagement.Interface
         {
             const int I_PAD_LEN = 25;
             WriteLog(STR_LOG_SEP);
-            WriteLog("INIZIO ESECUZIONE TASK {0}", this.Runtime.SysTaskName);
+            WriteLog($"INIZIO ESECUZIONE TASK {this.Runtime.SysTaskName}");
             WriteLog(string.Empty);
-            WriteLog("Tipo Task   : {0}", "Task Class");
-            WriteLog("Assembly    : {0}", this.Runtime.SysAssemblyPath);
-            WriteLog("TaskClass   : {0}", this.Runtime.SysTaskClass);
+            
+            WriteLog($"Tipo Task   : {this.Runtime.SysTaskType}");
+            WriteLog($"Assembly    : {this.Runtime.SysAssemblyPath}");
+            WriteLog($"TaskClass   : {this.Runtime.SysTaskClass}");
 
            
 
-            WriteLog("Sistema     : {0}", this.Runtime.SysSistema);
-            WriteLog("Descrizione : {0}", this.Runtime.SysNote);
-            WriteLog("Riferimento : {0}", this.Runtime.SysRiferimento);
-            WriteLog("LogDir      : {0}", this.Runtime.SysLogDir);
+            WriteLog($"Sistema     : {this.Runtime.SysSistema}");
+            WriteLog($"Descrizione : {this.Runtime.SysNote}");
+            WriteLog($"Riferimento : {this.Runtime.SysRiferimento}");
+            WriteLog($"LogDir      : {this.Runtime.SysLogDir}");
 
-            WriteLog("TipoNotifica: {0}", this.Runtime.SysTipoNotifica);
+            WriteLog($"TipoNotifica: {this.Runtime.SysTipoNotifica}");
             if (this.Runtime.SysTipoNotifica == (int)ETipoNotificaEsito.Email)
             {
-                WriteLog("MailFROM    : {0}", this.Runtime.SysMailFROM);
-                WriteLog("MailTO      : {0}", this.Runtime.SysMailTO);
-                WriteLog("MailCC      : {0}", this.Runtime.SysMailCC);
-                WriteLog("MailBCC     : {0}", this.Runtime.SysMailBCC);
+                WriteLog($"MailFROM    : {this.Runtime.SysMailFROM}");
+                WriteLog($"MailTO      : {this.Runtime.SysMailTO}");
+                WriteLog($"MailCC      : {this.Runtime.SysMailCC}");
+                WriteLog($"MailBCC     : {this.Runtime.SysMailBCC}");
             }
 
             WriteLog(STR_LOG_SEP);
             WriteLog("DATI ESECUZIONE TASK");
             WriteLog(string.Empty);
-            WriteLog("ProcessID   : {0}", this.Runtime.TaskPID);
-            WriteLog("HostName    : {0}", Environment.MachineName);
-            WriteLog("UserName    : {0}", Environment.UserName);
-            WriteLog("DomainName  : {0}", Environment.UserDomainName);
-            WriteLog("HostSystem  : {0}", Environment.OSVersion.VersionString);
+            WriteLog($"ProcessID   : {this.Runtime.TaskPID}");
+            WriteLog($"HostName    : {Environment.MachineName}");
+            WriteLog($"UserName    : {Environment.UserName}");
+            WriteLog($"DomainName  : {Environment.UserDomainName}");
+            WriteLog($"HostSystem  : {Environment.OSVersion.VersionString}");
             WriteLog(STR_LOG_SEP);
 
 
             // Param utente
-            WriteLog("PARAMETRI UTENTE ({0})", this.Runtime.UserParams.Count);
+            WriteLog($"PARAMETRI UTENTE ({this.Runtime.UserParams.Count})");
             WriteLog(string.Empty);
             foreach (var item in this.Runtime.UserParams.Values)
             {
-                if (item.IsVisibile)
-                    WriteLog("  * {0} => {1}", item.Chiave.PadRight(I_PAD_LEN), item.Valore);
-                else
-                    WriteLog("  * {0} => {1}", item.Chiave.PadRight(I_PAD_LEN), "Non Visualizzato");
+                WriteLog("  * {0} => {1}", item.Chiave.PadRight(I_PAD_LEN), item.IsVisibile ? item.Valore : @"**********");
             }
 
             WriteLog(STR_LOG_SEP);
@@ -311,10 +305,10 @@ namespace TaskManagement.Interface
             WriteLog(STR_LOG_SEP);
             WriteLog("INFO FINE ESECUZIONE TASK");
             WriteLog(string.Empty);
-            WriteLog("Inizio: {0}", this.Runtime.TaskStartDate.ToString("dd/MM/yyyy HH:mm:ss"));
-            WriteLog("Fine  : {0}", this.Runtime.TaskEndDate.ToString("dd/MM/yyyy HH:mm:ss"));
-            WriteLog("Durata: {0} (ore:min:sec.msec)", this.Runtime.TaskEndDate.Subtract(this.Runtime.TaskStartDate).ToString());
-            WriteLog("Esito : {0}", this.Runtime.TaskLastReturnCode);
+            WriteLog($"Inizio: {this.Runtime.TaskStartDate:dd/MM/yyyy HH:mm:ss}");
+            WriteLog($"Fine  : {this.Runtime.TaskEndDate:dd/MM/yyyy HH:mm:ss}");
+            WriteLog($"Durata: {this.Runtime.TaskEndDate.Subtract(this.Runtime.TaskStartDate).ToString()} (ore:min:sec.msec)");
+            WriteLog($"Esito : {this.Runtime.TaskLastReturnCode}");
         }
 
 

@@ -14,6 +14,7 @@ namespace TaskManagement.Interface
     {
          int SysTaskId { get; set; }
          string SysTaskName { get; set; }
+         string SysTaskType { get; set; }
          string SysAssemblyPath { get; set; }
          string SysTaskClass { get; set; }
          string SysLogDir { get; set; }

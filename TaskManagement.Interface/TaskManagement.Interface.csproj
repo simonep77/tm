@@ -44,6 +44,7 @@
     <Compile Include="ITaskRuntimeParametro.cs" />
     <Compile Include="ITaskRuntimeInfo.cs" />
     <Compile Include="ITaskSegnalazione.cs" />
+    <Compile Include="TaskExecProgram.cs" />
     <Compile Include="TaskRuntimeParametro.cs" />
     <Compile Include="TaskSegnalazione.cs" />
     <Compile Include="ITaskTM.cs" />
