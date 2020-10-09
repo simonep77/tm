@@ -1,7 +1,7 @@
 ﻿using System;
 using TaskManagement.Common;
 
-namespace TaskInterfaceLib
+namespace TaskManagement.Interface
 {
 
     /// <summary>
@@ -32,7 +32,12 @@ namespace TaskInterfaceLib
         /// <summary>
         /// Info di esecuzione
         /// </summary>
-        TaskRuntimeinfo Runtime { get; }
+        ITaskRunTimeInfo Runtime { get; }
+
+        /// <summary>
+        /// Richiama routine di inizializzazione
+        /// </summary>
+        void Init();
 
         /// <summary>
         /// Esecuzione del task

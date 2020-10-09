@@ -1,8 +1,8 @@
-﻿using TaskInterfaceLib;
+﻿using TaskManagement.Interface;
 
 namespace TaskEsempio
 {
-    public class TaskProva : TaskBase
+    public class TaskProva : TaskBaseTM
     {
         protected override bool CheckUserParams()
         {

@@ -40,12 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ITaskRuntimeParametroLista.cs" />
+    <Compile Include="ITaskRuntimeParametro.cs" />
+    <Compile Include="ITaskRuntimeInfo.cs" />
+    <Compile Include="ITaskSegnalazione.cs" />
+    <Compile Include="TaskRuntimeParametro.cs" />
     <Compile Include="TaskSegnalazione.cs" />
     <Compile Include="ITaskTM.cs" />
-    <Compile Include="ListaParametri.cs" />
+    <Compile Include="TaskRuntimeParametroLista.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TaskBase.cs" />
-    <Compile Include="TaskRuntimeInfo.cs" />
+    <Compile Include="TaskBaseTM.cs" />
+    <Compile Include="TaskRunTimeInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TaskManagement.Common\TaskManagement.Common.csproj">

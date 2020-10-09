@@ -1,16 +1,12 @@
 ﻿using Bdo.Objects;
-using Bdo.Utils;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using TaskInterfaceLib;
 using TaskManagement.Common;
 using TaskManagement.DAL;
+using TaskManagement.Interface;
 
 namespace TaskManagement.BIZ.src
 {
@@ -61,7 +57,7 @@ namespace TaskManagement.BIZ.src
             //Parametri
             foreach (var item in this.Parametri.Value)
             {
-                task.Runtime.UserParams.Add(item.Chiave, new ParametroItem(item.Chiave,item.Valore, item.Visibile));
+                task.Runtime.UserParams.Add(item.Chiave, new Interface.TaskRuntimeParametro(item.Chiave,item.Valore, item.Visibile));
             }
 
             task.Runtime.TaskStartDate = this.mEsecuzione.DataInserimento;
@@ -70,7 +66,8 @@ namespace TaskManagement.BIZ.src
             Directory.CreateDirectory(this.DataObj.LogDir);
             Directory.CreateDirectory(this.DataObj.DatiDir);
 
-            task.Runtime.InitLogger();
+            //Inizializza
+            task.Init();
         }
 
         /// <summary>

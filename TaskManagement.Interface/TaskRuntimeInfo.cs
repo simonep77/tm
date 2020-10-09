@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TaskManagement.Common;
+using TaskManagement.Interface;
 
-namespace TaskInterfaceLib
+namespace TaskManagement.Interface
 {
     /// <summary>
     /// Informazioni di esecuzune task
     /// </summary>
-    public class TaskRuntimeinfo: MarshalByRefObject
+    public class TaskRuntimeInfo: MarshalByRefObject, ITaskRunTimeInfo
     {
         public int SysTaskId { get; set; }
         public string SysTaskName { get; set; }
@@ -25,19 +26,18 @@ namespace TaskInterfaceLib
         public string SysMailTO { get; set; }
         public string SysMailCC { get; set; }
         public string SysMailBCC { get; set; }
-        public ILogger Logger { get; set; }
         public string LogFileName { get; set; }
         public int TaskPID { get; set; }
         public DateTime TaskStartDate { get; set; }
         public DateTime TaskEndDate { get; set; }
         public int TaskLastReturnCode { get; set; }
         public string TaskLastMessage { get; set; }
-        public ListaParametri UserParams { get; } = new ListaParametri();
+        public ITaskRuntimeParametroLista UserParams { get; } = new TaskRuntimeParametroLista();
 
         /// <summary>
         /// Segnalazioni applicative fornite durante l'esecuzione
         /// </summary>
-        public List<TaskSegnalazione> Segnalazioni = new List<TaskSegnalazione>();
+        public List<ITaskSegnalazione> Segnalazioni { get; } = new List<ITaskSegnalazione>();
 
         /// <summary>
         /// Indica se presente almeno una segnalazione di errore
@@ -46,7 +46,7 @@ namespace TaskInterfaceLib
         {
             get
             {
-                return this.Segnalazioni.Where(s => s.Tipo == ETipoSegnalazione.Error).Any();
+                return this.Segnalazioni.Where(s => s.Tipo == (int)ETipoSegnalazione.Error).Any();
             }
         }
 
@@ -57,17 +57,11 @@ namespace TaskInterfaceLib
         {
             get
             {
-                return this.Segnalazioni.Where(s => s.Tipo == ETipoSegnalazione.Warning).Any();
+                return this.Segnalazioni.Where(s => s.Tipo == (int)ETipoSegnalazione.Warning).Any();
             }
         }
 
-        public void InitLogger()
-        {
-            if (this.Logger != null)
-                throw new ApplicationException(@"Impossibile inizializzare un logger gia' istanziato");
 
-            this.Logger = new FileLogger(this.LogFileName);
-        }
     }
 
 }

@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using TaskManagement.Common;
 
-namespace TaskInterfaceLib
+namespace TaskManagement.Interface
 {
-    public abstract class TaskBase : MarshalByRefObject, ITaskTM
+    public abstract class TaskBaseTM : MarshalByRefObject, ITaskTM
     {
         protected const string STR_LOG_SEP = @"===================================================================================";
 
-        public TaskRuntimeinfo Runtime { get; } = new TaskRuntimeinfo();
+        private ILogger mLogger;
+        public ITaskRunTimeInfo Runtime { get; } = new TaskRuntimeInfo();
 
         public event TaskEvents.OnProgressEventHandler OnReportProgress;
         public event TaskEvents.OnTaskSegnalazione OnReportSegnalazione;
@@ -22,12 +23,20 @@ namespace TaskInterfaceLib
 
         public void Dispose()
         {
-            this.Runtime.Logger?.StopLog();
+            this.mLogger?.StopLog();
+        }
+
+        public void Init()
+        {
+            if (this.mLogger != null)
+                throw new ApplicationException(@"Impossibile inizializzare un logger gia' istanziato");
+
+            this.mLogger = new FileLogger(this.Runtime.LogFileName);
         }
 
         public void Execute()
         {
-            this.Runtime.Logger.StartLog();
+            this.mLogger.StartLog();
             try
             {
                 //Prevalorizzazioni varie..
@@ -68,7 +77,7 @@ namespace TaskInterfaceLib
             }
             finally
             {
-                this.Runtime.Logger.StopLog();
+                this.mLogger.StopLog();
             }
             
         }
@@ -169,7 +178,7 @@ namespace TaskInterfaceLib
         /// <remarks></remarks>
         protected void WriteLog(string messageFmt, params object[] args)
         {
-            this.Runtime.Logger.WriteLog(messageFmt, args);
+            this.mLogger.WriteLog(messageFmt, args);
         }
 
         /// <summary>
@@ -181,7 +190,7 @@ namespace TaskInterfaceLib
         /// <param name="text"></param>
         protected void ReportSegnalazione(ETipoSegnalazione tipo, string chiaveEntita, string tipoEntita, string testo)
         {
-            this.Runtime.Segnalazioni.Add(new TaskSegnalazione() { Tipo = tipo, ChiaveEntita= chiaveEntita, TipoEntita= tipoEntita, Testo= testo });
+            this.Runtime.Segnalazioni.Add(new TaskSegnalazione() { Tipo = (int)tipo, ChiaveEntita= chiaveEntita, TipoEntita= tipoEntita, Testo= testo });
             this.WriteLog($"Segnalazione {tipo} - {tipoEntita} - {chiaveEntita} - {testo}");
             this.OnReportSegnalazione?.Invoke(this, tipo, chiaveEntita, tipoEntita, testo);
         }
@@ -209,7 +218,7 @@ namespace TaskInterfaceLib
         /// <remarks></remarks>
         protected string GetUserParamWithDefault(string key, string defaultValue)
         {
-            ParametroItem item = null;
+            ITaskRuntimeParametro item = null;
             
             if (!this.Runtime.UserParams.TryGetValue(key, out item) || string.IsNullOrWhiteSpace(item.Valore))
                 return defaultValue;
