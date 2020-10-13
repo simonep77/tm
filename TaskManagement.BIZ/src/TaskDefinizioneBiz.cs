@@ -142,15 +142,23 @@ namespace TaskManagement.BIZ.src
                 var subj = $"{rctext} - {this.DataObj.Sistema.Nome} {this.DataObj.Nome} ";
                 var body = $"Elaborazione avviata alle { this.mEsecuzione.DataInserimento:dd/MM/yyyy HH:mm:ss} e conclusa alle {this.mEsecuzione.DataTermine:dd/MM/yyyy HH:mm:ss}";
 
+
                 //Aggiunge log corrente
                 var sbLogs = new StringBuilder(task.Runtime.LogFileName);
 
                 //Se il task e' un job deve raccogliere i vari file di log
                 if (task is TaskJob)
                 {
+                    var sbBody = new StringBuilder(body);
+                    sbBody.Append(@"<br /><ul>");
+
                     var tJob = (TaskJob)task;
                     foreach (var item in tJob.TaskEseguiti)
                     {
+                        //Scrive output esito vari subtask
+                        sbBody.Append($"<li> N. {item.DettJob.Progressivo} - {item.DettJob.SubTask.Id} {item.DettJob.SubTask.Nome}");
+                        sbBody.Append($"<br/>Eseguito: {item.Eseguito} - Esito: {item.Esito.ReturnCode} {item.Esito.ReturnMessage}</li>");
+
                         if (!item.Eseguito)
                             continue;
 
@@ -165,6 +173,9 @@ namespace TaskManagement.BIZ.src
                         }
 
                     }
+                    sbBody.Append(@"</ul>");
+
+                    body = sbBody.ToString();
                 }
 
                 //Invia
