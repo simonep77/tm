@@ -19,6 +19,7 @@ namespace TaskManagement.BIZ.src
     {
         private Process mThisProcess = Process.GetCurrentProcess();
         private TaskEsecuzione mEsecuzione;
+        private TaskSchedulazionePiano mPianoSched;
 
         /// <summary>
         /// Ottiene o imposta l'id del job di riferimento che ha originato l'esecuzione richiesta e che verra' registrato nell'esecuzione corrente
@@ -34,6 +35,28 @@ namespace TaskManagement.BIZ.src
             {
                 return (this.DataObj.TipoTaskId == (short)ETipoTask.TaskJob);
             } 
+        }
+
+        /// <summary>
+        /// Indica se il task sta girando o ha girato come sotto-task di un job
+        /// </summary>
+        public bool IsRunningUnderJob
+        {
+            get
+            {
+                return (this.DataObj.TipoTaskId != (short)ETipoTask.TaskJob && this.ParentJobEsecuzioneId > 0L);
+            }
+        }
+
+        /// <summary>
+        /// Indica se sta girando in modalita' schedulata
+        /// </summary>
+        public bool IsRunningUnderSchedule
+        {
+            get
+            {
+                return (this.PianoSchedulazioneId > 0L);
+            }
         }
 
 
@@ -127,6 +150,19 @@ namespace TaskManagement.BIZ.src
             this.mEsecuzione.JobEsecuzioneId = this.ParentJobEsecuzioneId;//Eventuale dipendenza da job in esecuzione
             this.mEsecuzione.SchedPianoId = this.PianoSchedulazioneId;//Eventuale dipendenza da job in esecuzione
             this.Slot.SaveObject(this.mEsecuzione);
+
+            //Se impostato un piano di schedulazione 
+            if (this.IsRunningUnderSchedule && (this.IsJob || !this.IsRunningUnderJob))
+            {
+                this.mPianoSched = this.Slot.LoadObjByPK<TaskSchedulazionePiano>(this.PianoSchedulazioneId);
+
+                //Se la schedulazione risulta gia' avviata = ERRORE
+                if (this.mPianoSched.StatoEsecuzioneId != (short)EStatoEsecuzione.PS_Pianificato)
+                    throw new ApplicationException($"Attenzione! la schedulazione del task {this.DataObj.Id} {this.DataObj.Nome} del {this.mPianoSched.DataEsecuzione:dd/MM/yyyy HH:mm} risulta gia' avviata/eseguita");
+
+                this.mPianoSched.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_InEsecuzione; 
+                this.Slot.SaveObject(this.mPianoSched);
+            }
         }
 
         /// <summary>
@@ -139,6 +175,14 @@ namespace TaskManagement.BIZ.src
             this.mEsecuzione.ReturnCode = code;
             this.mEsecuzione.ReturnMessage = message;
             this.Slot.SaveObject(this.mEsecuzione);
+
+            //Se impostato un piano di schedulazione lo conclude aggiornando lo stato
+            if (this.IsRunningUnderSchedule && (this.IsJob || !this.IsRunningUnderJob))
+            {
+                this.mPianoSched.StatoEsecuzioneId = code == (int)ETaskReturnCode.OK ? (short)EStatoEsecuzione.PS_TerminatoConSuccesso : (short)EStatoEsecuzione.PS_TerminatoConErrori;
+                this.Slot.SaveObject(this.mPianoSched);
+            }
+
         }
 
 
@@ -315,11 +359,8 @@ namespace TaskManagement.BIZ.src
                 //Inizializza
                 this.esecuzioneInizializzaTask(task);
 
-                //Aggancia metodi base per tracciamento
-
                 try
                 {
-                    //Deve inizializzare i parametri di runtime del task
                     //Esegue codice Task
                     task.Execute();
                     //Imposta output
@@ -381,7 +422,9 @@ namespace TaskManagement.BIZ.src
             var dates = cronExpr.GetNextOccurrences(DateTime.Now, planDateEnd);
 
             var plan = this.Slot.CreateList<TaskSchedulazionePianoLista>()
-                .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id));
+                .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id)
+                .And(Filter.In(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato, EStatoEsecuzione.PS_InEsecuzione)));
+
             //Verifico esistenza match piano gia' creato che non verra' modificato
             foreach (var dt in dates)
             {

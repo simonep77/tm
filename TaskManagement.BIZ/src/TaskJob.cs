@@ -71,8 +71,9 @@ namespace TaskManagement.BIZ.src
                 
                //Istanzia ed esegue
                 var subTaskBiz = jobdett.SubTask.ToBizObject<TaskDefinizioneBiz>();
-                //Imposta l'id di esecuzione del job principale
+                //Imposta l'id di esecuzione del job principale e l'eventuale piano di esecuzione
                 subTaskBiz.ParentJobEsecuzioneId = this.mTaskJobBiz.UltimaEsecuzione.Id;
+                subTaskBiz.PianoSchedulazioneId = this.mTaskJobBiz.PianoSchedulazioneId;
                 //Esegue
                 subTaskBiz.Run();
                 //Imposta task eseguito

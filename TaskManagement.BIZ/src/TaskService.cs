@@ -1,4 +1,5 @@
 ﻿using Bdo.Objects;
+using System;
 using TaskManagement.DAL;
 
 namespace TaskManagement.BIZ.src
@@ -29,7 +30,31 @@ namespace TaskManagement.BIZ.src
         }
 
 
-      
+        /// <summary>
+        /// dato un task esegue la rigenerazione del piano di schedulazione
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <param name="numOfdays"></param>
+        public void RebuildPlanByTaskId(int taskId, int numOfdays)
+        {
+            var tdefBiz = this.Slot.BizNewWithLoadByPK<TaskDefinizioneBiz>(taskId);
+
+            tdefBiz.ReBuildSchedulePlan(DateTime.Now.AddDays(numOfdays));
+        }
+
+
+        public void RunTaskByPianoSchedId(long pianoSchedId)
+        {
+            var piano = this.Slot.LoadObjByPK<TaskSchedulazionePiano>(pianoSchedId);
+            var tdefBiz = piano.Task.ToBizObject<TaskDefinizioneBiz>();
+            //Imposta il parametro di piano in esecuzione
+            tdefBiz.PianoSchedulazioneId = piano.Id;
+
+            tdefBiz.Run();
+        }
+
+
+
 
     }
 }

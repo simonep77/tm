@@ -9,7 +9,7 @@ namespace TaskManagement.DAL
     {
         public const string KEY_RUN_DATE = @"KEY_RUN_DATE";
 
-        [PrimaryKey()]
+        [PrimaryKey, AutoIncrement]
         public abstract long Id { get; set; }
 
         [SearchKey(KEY_RUN_DATE)]

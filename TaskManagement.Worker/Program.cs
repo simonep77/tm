@@ -33,8 +33,9 @@ namespace TaskManagement.Worker
 
                 if (long.TryParse(taskMainArg, out lSchedPlanId))
                 {
-                    throw new NotImplementedException(@"Schedulazione non ancora implementata");
-                    //Poi lo implemento
+                    
+                    //taskSvc.RebuildPlanByTaskId(3, 2);
+                    taskSvc.RunTaskByPianoSchedId(lSchedPlanId);
                 }
                 else
                 {
