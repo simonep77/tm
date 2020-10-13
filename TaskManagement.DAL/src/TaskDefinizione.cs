@@ -61,6 +61,8 @@ namespace TaskManagement.DAL
         public abstract short MantieniNumLogDB { get; set; }
         public abstract short MantieniNumLogFS { get; set; }
         public abstract sbyte Eliminato { get; set; }
+        [AcceptNull()]
+        public abstract string CronString { get; set; }
         public abstract DateTime DataInizio { get; set; }
         [AcceptNull()]
         public abstract DateTime DataFine { get; set; }

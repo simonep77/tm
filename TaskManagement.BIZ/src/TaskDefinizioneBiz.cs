@@ -1,8 +1,10 @@
 ﻿using Bdo.Objects;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -362,7 +364,60 @@ namespace TaskManagement.BIZ.src
 
         }
 
+        /// <summary>
+        /// Ricostruisce il piano di schedulazione
+        /// </summary>
+        /// <param name="planDateEnd"></param>
+        /// <returns></returns>
+        public List<TaskSchedulazionePiano> ReBuildSchedulePlan(DateTime planDateEnd)
+        {
+            if (string.IsNullOrWhiteSpace(this.DataObj.CronString))
+                throw new ArgumentException("Errore ReBuildSchedulePlan - nessuna stringa cron di schedulazione impostata");
 
+            var planOut = new List<TaskSchedulazionePiano>();
+
+            var cronExpr = NCrontab.CrontabSchedule.Parse(this.DataObj.CronString);
+
+            var dates = cronExpr.GetNextOccurrences(DateTime.Now, planDateEnd);
+
+            var plan = this.Slot.CreateList<TaskSchedulazionePianoLista>()
+                .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id));
+            //Verifico esistenza match piano gia' creato che non verra' modificato
+            foreach (var dt in dates)
+            {
+                //Cerca schedulazione
+                var sched = plan.Where(d => d.DataEsecuzione == dt);
+
+                if (sched.Any())
+                {
+                    //Rimuove da elenco
+                    var plExist = sched.First();
+                    planOut.Add(plExist);
+                    plan.Remove(plExist);
+                    continue;
+                }
+                //Crea nuova schedulazione
+                var plNew = this.Slot.CreateObject<TaskSchedulazionePiano>();
+                plNew.TaskDefId = this.DataObj.Id;
+                plNew.DataEsecuzione = dt;
+                plNew.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_Pianificato;
+                this.Slot.SaveObject(plNew);
+                planOut.Add(plNew);
+
+            }
+
+            //Imposta come saltati i piani non verificati
+            foreach (var item in plan)
+            {
+                if (item.StatoEsecuzioneId != (short)EStatoEsecuzione.PS_Pianificato)
+                    continue;
+
+                item.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_Saltato;
+                this.Slot.SaveObject(item);
+            }
+
+            return planOut;
+        }
      
 
     }
