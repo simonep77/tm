@@ -22,7 +22,19 @@ namespace TaskManagement.BIZ.src
         /// Ottiene o imposta l'id del job di riferimento che ha originato l'esecuzione richiesta e che verra' registrato nell'esecuzione corrente
         /// </summary>
         public long ParentJobEsecuzioneId { get; set; }
-        
+
+
+        /// <summary>
+        /// indica se il task e' un Job
+        /// </summary>
+        public bool IsJob { 
+            get
+            {
+                return (this.DataObj.TipoTaskId == (short)ETipoTask.TaskJob);
+            } 
+        }
+
+
         /// <summary>
         /// Ottiene o imposta il piano di schedulazione che ha originato l'esecuzione corrente
         /// </summary>
@@ -146,8 +158,8 @@ namespace TaskManagement.BIZ.src
                 //Aggiunge log corrente
                 var sbLogs = new StringBuilder(task.Runtime.LogFileName);
 
-                //Se il task e' un job deve raccogliere i vari file di log
-                if (task is TaskJob)
+                //Se il task e' un job deve raccogliere i vari file di log e scrivere una mail piu' dettagliata
+                if (this.IsJob)
                 {
                     var sbBody = new StringBuilder(body);
                     sbBody.Append(@"<br /><ul>");
