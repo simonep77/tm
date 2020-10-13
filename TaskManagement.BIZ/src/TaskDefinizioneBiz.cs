@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using TaskManagement.Common;
 using TaskManagement.DAL;
 using TaskManagement.Interface;
@@ -85,8 +86,6 @@ namespace TaskManagement.BIZ.src
             Directory.CreateDirectory(this.DataObj.LogDir);
             Directory.CreateDirectory(this.DataObj.DatiDir);
 
-            //Inizializza
-            task.Init();
 
             //Se necessario imposta la visibilita' della console
             // if (!this.DataObj.MostraConsole)
@@ -95,6 +94,10 @@ namespace TaskManagement.BIZ.src
                 Console.Title = $"{this.DataObj.Sistema.Nome} - {this.DataObj.Nome} (PID: {this.mThisProcess.Id})";
                 ConsoleHelper.SetVisible(Console.Title, this.DataObj.MostraConsole);
             }
+
+            //Inizializza
+            task.Init();
+
         }
 
         /// <summary>
@@ -125,7 +128,7 @@ namespace TaskManagement.BIZ.src
         }
 
 
-        private void esecuzioneEseguiNotifica(string logFile)
+        private void esecuzioneEseguiNotifica(ITaskTM task)
         {
             if (this.DataObj.TipoNotificaId == (int)ETipoNotificaEsito.Nessuna)
                 return;
@@ -139,7 +142,34 @@ namespace TaskManagement.BIZ.src
                 var subj = $"{rctext} - {this.DataObj.Sistema.Nome} {this.DataObj.Nome} ";
                 var body = $"Elaborazione avviata alle { this.mEsecuzione.DataInserimento:dd/MM/yyyy HH:mm:ss} e conclusa alle {this.mEsecuzione.DataTermine:dd/MM/yyyy HH:mm:ss}";
 
-                Mailer.Send(this.DataObj.MailFROM, this.DataObj.MailTO, this.DataObj.MailCC, this.DataObj.MailBCC, subj, body, logFile);
+                //Aggiunge log corrente
+                var sbLogs = new StringBuilder(task.Runtime.LogFileName);
+
+                //Se il task e' un job deve raccogliere i vari file di log
+                if (task is TaskJob)
+                {
+                    var tJob = (TaskJob)task;
+                    foreach (var item in tJob.TaskEseguiti)
+                    {
+                        if (!item.Eseguito)
+                            continue;
+
+                        var tExecBiz = item.Esito.ToBizObject<TaskEsecuzioneBiz>();
+
+                        if (tExecBiz.Files.Value.Count > 0)
+                        {
+                            var sFile = Path.ChangeExtension(Path.Combine(item.Esito.Task.LogDir, tExecBiz.Files.Value.First().FileName), @".zip");
+
+                            if (File.Exists(sFile))
+                                sbLogs.Append($";{sFile}");
+                        }
+
+                    }
+                }
+
+                //Invia
+                Mailer.Send(this.DataObj.MailFROM, this.DataObj.MailTO, this.DataObj.MailCC, this.DataObj.MailBCC, subj, body, sbLogs.ToString());
+
             }
             catch (Exception e)
             {
@@ -282,7 +312,7 @@ namespace TaskManagement.BIZ.src
                 }
 
                 //Esegue notifica email
-                this.esecuzioneEseguiNotifica(task.Runtime.LogFileName);
+                this.esecuzioneEseguiNotifica(task);
 
                 //Carica log su DB
                 this.esecuzioneCaricaLogFile(task.Runtime.LogFileName);

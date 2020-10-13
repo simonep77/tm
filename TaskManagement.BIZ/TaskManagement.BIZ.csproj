@@ -50,6 +50,7 @@
     <Compile Include="src\ConsoleHelper.cs" />
     <Compile Include="src\Mailer.cs" />
     <Compile Include="src\TaskDefinizioneBiz.cs" />
+    <Compile Include="src\TaskEsecuzioneBiz.cs" />
     <Compile Include="src\TaskJob.cs" />
     <Compile Include="src\TaskService.cs" />
   </ItemGroup>

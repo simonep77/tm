@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using TaskManagement.Common;
@@ -11,6 +12,14 @@ namespace TaskManagement.BIZ.src
     public class TaskJob : TaskBaseTM
     {
 
+        public List<EsitoTaskEseguito> TaskEseguiti { get; } = new List<EsitoTaskEseguito>();
+
+        public class EsitoTaskEseguito
+        {
+            public TaskDettaglioJob DettJob;
+            public bool Eseguito;
+            public TaskEsecuzione Esito;
+        }
 
         public TaskJob(TaskDefinizioneBiz tb)
         {
@@ -27,20 +36,20 @@ namespace TaskManagement.BIZ.src
         {
             var iret = 0;
             var iretGlobale = 0;
-            var svc = new TaskService(this.mTaskJobBiz.GetSlot());
-            var lstTaskEseguiti = new List<TaskDefinizioneBiz>();
-            var lstTaskNonEseguiti = new List<TaskDettaglioJob>();
 
             //Print
-            this.preparaAvvioJob();
+            this.printAvvioJobs();
 
             foreach (var jobdett in this.mTaskJobBiz.DettagliJob.Value)
             {
+                this.printJob(jobdett);
+
                 if (jobdett.Attivo == 0)
                 {
                     WriteLog(string.Empty);
                     WriteLog($"Attenzione! Il task {jobdett.Progressivo} - {jobdett.SubTask.Nome} non viene avviato in quanto NON ATTIVO a livello di JOB ");
-                    lstTaskNonEseguiti.Add(jobdett);
+                    //Aggiunge a task eseguiti
+                    this.TaskEseguiti.Add(new EsitoTaskEseguito() { DettJob= jobdett, Eseguito=false, Esito = null });
                     //Il task successivo parte con il return code dell'ultimo in errore
                     continue;
                 }
@@ -50,13 +59,15 @@ namespace TaskManagement.BIZ.src
                 {
                     WriteLog(string.Empty);
                     WriteLog($"Attenzione! Il task {jobdett.Progressivo} - {jobdett.SubTask.Nome} non viene avviato per mancata verifica su returnCode del task precedente {iret} ");
-                    lstTaskNonEseguiti.Add(jobdett);
+                    //Aggiunge a task eseguiti
+                    this.TaskEseguiti.Add(new EsitoTaskEseguito() { DettJob = jobdett, Eseguito = false, Esito = null });
                     //Il task successivo parte con il return code dell'ultimo in errore
                     continue;
                 }
 
+               //Se non richiesto l'invio email di esecuzione del task lo disattiva
                if (jobdett.AbilitaNotifiche == 0)
-                jobdett.SubTask.TipoNotificaId = (short)ETipoNotificaEsito.Nessuna;
+                    jobdett.SubTask.TipoNotificaId = (short)ETipoNotificaEsito.Nessuna;
                 
                //Istanzia ed esegue
                 var subTaskBiz = jobdett.SubTask.ToBizObject<TaskDefinizioneBiz>();
@@ -64,18 +75,21 @@ namespace TaskManagement.BIZ.src
                 subTaskBiz.ParentJobEsecuzioneId = this.mTaskJobBiz.UltimaEsecuzione.Id;
                 //Esegue
                 subTaskBiz.Run();
-
+                //Imposta task eseguito
+                this.TaskEseguiti.Add(new EsitoTaskEseguito() { DettJob= jobdett, Eseguito=true, Esito = subTaskBiz.UltimaEsecuzione });
                 //Imposta ultima esecuzione
                 iret = subTaskBiz.UltimaEsecuzione.ReturnCode;
                 //Aggiorna errori globale
                 iretGlobale += iret;
             }
 
+            this.printFineJob();
+
             return iret;
         }
 
 
-        private void preparaAvvioJob()
+        private void printAvvioJobs()
         {
             // Print Task da eseguire
             WriteLog($"Task che compongono il job: {this.mTaskJobBiz.DettagliJob.Value.Count}");
@@ -86,11 +100,49 @@ namespace TaskManagement.BIZ.src
             }
 
             WriteLog(string.Empty);
+        }
 
+        private void printJob(TaskDettaglioJob dett)
+        {
+            // Print Task da eseguire
+            WriteLog(string.Empty);
+            WriteLog(string.Empty);
+            WriteLog(string.Empty);
+            WriteLog(string.Empty.PadRight(STR_LOG_SEP.Length,'*'));
+            WriteLog($" ({dett.Progressivo}) AVVIO {dett.SubTask.Nome.ToUpper()}");
+            WriteLog(string.Empty.PadRight(STR_LOG_SEP.Length, '*'));
+            WriteLog(string.Empty);
         }
 
 
+        private void printFineJob()
+        {
+            // Print Task da eseguire
+            WriteLog(string.Empty);
+            WriteLog(string.Empty);
+            WriteLog(string.Empty);
+            WriteLog(string.Empty.PadRight(STR_LOG_SEP.Length,'*'));
+            WriteLog($"*** ESITO DEI TASK DEL JOB: ");
+            WriteLog(string.Empty.PadRight(STR_LOG_SEP.Length, '*'));
 
+            foreach (var item in this.TaskEseguiti)
+            {
+                var sEseguito = string.Concat("- Eseguito: ", item.Eseguito ? "SI" : "NO");
+                var sEsito = string.Empty;
+                if (item.Eseguito)
+                    sEsito  = string.Concat("- Esito: ", item.Esito.ReturnCode == 0 ? "OK" : "ERRORE");
+
+                WriteLog($"***  ({item.DettJob.Progressivo.ToString(),2}) - ID# {item.DettJob.SubTaskDefId,3} {item.DettJob.SubTask.Nome,-40} {sEseguito} {sEsito}");
+                WriteLog(string.Empty);
+
+            }
+            WriteLog(string.Empty.PadRight(STR_LOG_SEP.Length, '*'));
+
+            WriteLog(string.Empty);
+            WriteLog(string.Empty);
+            WriteLog(string.Empty);
+
+        }
 
 
     }
