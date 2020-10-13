@@ -9,10 +9,10 @@ namespace TaskManagement.DAL
     {
         [PrimaryKey()]
         public abstract long Id { get; set; }
-        public abstract int SchedulazioneId { get; set; }
+        public abstract int TaskDefId { get; set; }
         
-        [PropertyMap(nameof(SchedulazioneId))]
-        public abstract TaskSchedulazione Schedulazione { get; }
+        [PropertyMap(nameof(TaskDefId))]
+        public abstract TaskDefinizione Task { get; }
         public abstract DateTime DataEsecuzione { get; set; }
 
         public abstract short StatoEsecuzioneId { get; set; }

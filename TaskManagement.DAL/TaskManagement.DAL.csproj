@@ -52,7 +52,6 @@
     <Compile Include="src\TaskDettaglioJob.cs" />
     <Compile Include="src\TaskSchedulazionePianoLista.cs" />
     <Compile Include="src\TaskSchedulazionePiano.cs" />
-    <Compile Include="src\TaskSchedulazioneLista.cs" />
     <Compile Include="src\TaskSistemaLista.cs" />
     <Compile Include="src\TaskStatoEsecuzioneLista.cs" />
     <Compile Include="src\TaskTipoFileLista.cs" />
@@ -62,7 +61,6 @@
     <Compile Include="src\TaskEsecuzione.cs" />
     <Compile Include="src\TaskFile.cs" />
     <Compile Include="src\TaskParametro.cs" />
-    <Compile Include="src\TaskSchedulazione.cs" />
     <Compile Include="src\TaskSistema.cs" />
     <Compile Include="src\TaskStatoEsecuzione.cs" />
     <Compile Include="src\TaskTipoFile.cs" />
