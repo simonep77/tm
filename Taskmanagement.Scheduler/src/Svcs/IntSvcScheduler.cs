@@ -175,9 +175,9 @@ namespace Taskmanagement.Scheduler.Svcs
                     var tasks = slot.CreateList<TaskDefinizioneLista>()
                         .LoadFullObjects()
                         .SearchByColumn(Filter.Eq(nameof(TaskDefinizione.Attivo), 1)
-                        .And(Filter.Neq(nameof(TaskDefinizione.CronString), string.Empty)
+                        .And(Filter.NotNull(nameof(TaskDefinizione.SchedCronString)).Or(Filter.Neq(nameof(TaskDefinizione.SchedCronString), string.Empty)))
                         .And(Filter.Lte(nameof(TaskDefinizione.DataInizio), DateTime.Today)
-                        .And(Filter.Gte(nameof(TaskDefinizione.DataFine), DateTime.Today)))));
+                        .And(Filter.Gte(nameof(TaskDefinizione.DataFine), DateTime.Today))));
 
                     iNumSched = tasks.Count;
                     var dtPlanStart = DateTime.Now;

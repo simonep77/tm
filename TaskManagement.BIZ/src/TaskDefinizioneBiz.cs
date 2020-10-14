@@ -326,7 +326,13 @@ namespace TaskManagement.BIZ.src
         }
 
 
-        private Tuple<ITaskTM, AppDomain> esecuzioneIstanziaTipoTask()
+        private class IstanzaTask
+        {
+            public ITaskTM Task;
+            public AppDomain Domain;
+        }
+
+        private IstanzaTask esecuzioneIstanziaTipoTask()
         {
             switch (this.DataObj.TipoTaskId)
             {
@@ -341,12 +347,12 @@ namespace TaskManagement.BIZ.src
 
                     var appDom = AppDomain.CreateDomain(@"tmDomain", null, domSetup);
                     var task = (ITaskTM)appDom.CreateInstanceAndUnwrap(Path.GetFileNameWithoutExtension(this.DataObj.AssemblyPath), this.DataObj.TaskClass);
-                    return new Tuple<ITaskTM, AppDomain>(task, appDom);
+                    return new IstanzaTask() { Task= task, Domain=appDom };
 
                 case (int)ETipoTask.TaskExecPgm:
-                    return new Tuple<ITaskTM, AppDomain>(new TaskExecProgram(), null);
+                    return new IstanzaTask() { Task = new TaskExecProgram(), Domain = null };
                 case (int)ETipoTask.TaskJob:
-                    return new Tuple<ITaskTM, AppDomain>(new TaskJob(this), null);
+                    return new IstanzaTask() { Task = new TaskJob(this), Domain = null };
                 default:
                     throw new NotImplementedException($"tipo di task {this.DataObj.TipoTaskId} non implementato");
             }
@@ -364,8 +370,8 @@ namespace TaskManagement.BIZ.src
             {
                 //Crea istanza nell'altro dominio
                 var tupla = this.esecuzioneIstanziaTipoTask();
-                task = tupla.Item1;
-                domain = tupla.Item2;
+                task = tupla.Task;
+                domain = tupla.Domain;
 
                 //Crea avvio esecuzione DB
                 this.esecuzioneAvvia();
@@ -426,12 +432,12 @@ namespace TaskManagement.BIZ.src
         /// <returns></returns>
         public List<TaskSchedulazionePiano> ReBuildSchedulePlan(DateTime planDateEnd)
         {
-            if (string.IsNullOrWhiteSpace(this.DataObj.CronString))
+            if (string.IsNullOrWhiteSpace(this.DataObj.SchedCronString))
                 throw new ArgumentException("Errore ReBuildSchedulePlan - nessuna stringa cron di schedulazione impostata");
 
             var newPlan = new List<TaskSchedulazionePiano>();
 
-            var cronExpr = NCrontab.CrontabSchedule.Parse(this.DataObj.CronString);
+            var cronExpr = NCrontab.CrontabSchedule.Parse(this.DataObj.SchedCronString);
 
             var dateStart = DateTime.Now;
 

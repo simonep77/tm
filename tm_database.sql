@@ -41,7 +41,7 @@ CREATE TABLE `taskdefinizioni` (
   `MantieniNumLogDB` int NOT NULL DEFAULT '60',
   `MantieniNumLogFS` int NOT NULL DEFAULT '60',
   `Eliminato` tinyint(1) NOT NULL DEFAULT '0',
-  `CronString` varchar(50) DEFAULT NULL,
+  `SchedCronString` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `DataInizio` date NOT NULL DEFAULT '2001-01-01',
   `DataFine` date NOT NULL DEFAULT '9999-12-31',
   PRIMARY KEY (`Id`),
@@ -56,10 +56,10 @@ CREATE TABLE `taskdefinizioni` (
 
 /*Data for the table `taskdefinizioni` */
 
-insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`Eliminato`,`CronString`,`DataInizio`,`DataFine`) values 
+insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`Eliminato`,`SchedCronString`,`DataInizio`,`DataFine`) values 
 (1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio','',1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,0,NULL,'2001-01-01','9999-12-31'),
 (2,'TaskNetstat',1,1,2,'netstat.exe','-ano','C:\\WORK\\TaskManData\\Log\\TaskEsterno','C:\\WORK\\TaskManData\\Dati\\TaskEsterno','',1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,'2001-01-01','9999-12-31'),
-(3,'TaskJobProva',1,1,3,'','','C:\\WORK\\TaskManData\\Log\\TaskJob','C:\\WORK\\TaskManData\\Dati\\Taskjob','',1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,'47 11,12 * * *','2001-01-01','9999-12-31');
+(3,'TaskJobProva',1,1,3,'','','C:\\WORK\\TaskManData\\Log\\TaskJob','C:\\WORK\\TaskManData\\Dati\\Taskjob','\0',1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,'47 11,12 * * *','2001-01-01','9999-12-31');
 
 /*Table structure for table `taskdettaglijob` */
 

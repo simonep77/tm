@@ -18,7 +18,7 @@ namespace TaskManagement.DAL
         {
             var sql = new StringBuilder(@"SET group_concat_max_len = 1024 * 1024;");
             sql.AppendLine();
-            sql.Append($"SELECT IFNULL(SHA1(GROUP_CONCAT(IFNULL(CONCAT(e.{nameof(TaskDefinizione.Id)},'+',e.{nameof(TaskDefinizione.CronString)}), '') ORDER BY e.Id SEPARATOR ';')), '') ");
+            sql.Append($"SELECT IFNULL(SHA1(GROUP_CONCAT(IFNULL(CONCAT(e.{nameof(TaskDefinizione.Id)},'+',e.{nameof(TaskDefinizione.SchedCronString)}), '') ORDER BY e.Id SEPARATOR ';')), '') ");
             sql.AppendLine();
             sql.Append($"FROM {slot.DbPrefixGetTableName<TaskDefinizione>()} e ");
             sql.AppendLine();
