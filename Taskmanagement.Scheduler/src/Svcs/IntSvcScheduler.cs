@@ -63,15 +63,15 @@ namespace Taskmanagement.Scheduler.Svcs
 
 
             // 3) Il job di check esiti schedulazione
-            trg = TriggerBuilder
-                .Create()
-                .WithIdentity(CostantiSched.Quartz.TriggerNames.System.ScheduleResultCheck, TRIGGER_INTERNAL_GROUP)
-                .WithSchedule(SimpleScheduleBuilder.RepeatMinutelyForever(AppContextTM.SCHEDULE_RESULT_CHECK_MINUTES))
-                //.StartAt(DateTime.Now.ToUniversalTime().AddMinutes(AppContextERD.SCHEDULE_RESULT_CHECK_MINUTES))
-                .Build();
+            //trg = TriggerBuilder
+            //    .Create()
+            //    .WithIdentity(CostantiSched.Quartz.TriggerNames.System.ScheduleResultCheck, TRIGGER_INTERNAL_GROUP)
+            //    .WithSchedule(SimpleScheduleBuilder.RepeatMinutelyForever(AppContextTM.SCHEDULE_RESULT_CHECK_MINUTES))
+            //    //.StartAt(DateTime.Now.ToUniversalTime().AddMinutes(AppContextERD.SCHEDULE_RESULT_CHECK_MINUTES))
+            //    .Build();
 
-            jobDett = new JobDetailImpl(CostantiSched.Quartz.JobNames.System.ScheduleResultCheck, JOB_INTERNAL_GROUP, typeof(JobScheduleResultChecker));
-            await this.mScheduler.ScheduleJob(jobDett, trg);
+            //jobDett = new JobDetailImpl(CostantiSched.Quartz.JobNames.System.ScheduleResultCheck, JOB_INTERNAL_GROUP, typeof(JobScheduleResultChecker));
+            //await this.mScheduler.ScheduleJob(jobDett, trg);
 
 
             AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job avviato");
