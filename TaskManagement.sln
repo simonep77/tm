@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManagement.Worker", "Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManagement.Common", "TaskManagement.Common\TaskManagement.Common.csproj", "{664A5335-1D37-4170-BD1E-B8CA6BDC00D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskmanagement.Scheduler", "Taskmanagement.Scheduler\Taskmanagement.Scheduler.csproj", "{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,18 @@ Global
 		{664A5335-1D37-4170-BD1E-B8CA6BDC00D1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{664A5335-1D37-4170-BD1E-B8CA6BDC00D1}.Release|x86.ActiveCfg = Release|Any CPU
 		{664A5335-1D37-4170-BD1E-B8CA6BDC00D1}.Release|x86.Build.0 = Release|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Debug|x86.Build.0 = Debug|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3BA055B-CDE7-472B-85D1-EDB84FE010DA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

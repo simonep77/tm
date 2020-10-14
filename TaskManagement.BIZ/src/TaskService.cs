@@ -1,5 +1,6 @@
 ﻿using Bdo.Objects;
 using System;
+using TaskManagement.Common;
 using TaskManagement.DAL;
 
 namespace TaskManagement.BIZ.src
@@ -42,7 +43,10 @@ namespace TaskManagement.BIZ.src
             tdefBiz.ReBuildSchedulePlan(DateTime.Now.AddDays(numOfdays));
         }
 
-
+        /// <summary>
+        /// Esegue schedulazione
+        /// </summary>
+        /// <param name="pianoSchedId"></param>
         public void RunTaskByPianoSchedId(long pianoSchedId)
         {
             var piano = this.Slot.LoadObjByPK<TaskSchedulazionePiano>(pianoSchedId);
@@ -50,7 +54,16 @@ namespace TaskManagement.BIZ.src
             //Imposta il parametro di piano in esecuzione
             tdefBiz.PianoSchedulazioneId = piano.Id;
 
+            //Scrive avvio schedulazione
+            piano.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_InEsecuzione;
+            this.Slot.SaveObject(piano);
+
+            //Esegue schedulazione
             tdefBiz.Run();
+
+            //Scrive fine schedulazione
+            piano.StatoEsecuzioneId = tdefBiz.UltimaEsecuzione.ReturnCode == 0 ? (short)EStatoEsecuzione.PS_TerminatoConSuccesso : (short)EStatoEsecuzione.PS_TerminatoConErrori;
+            this.Slot.SaveObject(piano);
         }
 
 

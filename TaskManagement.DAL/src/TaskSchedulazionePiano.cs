@@ -26,6 +26,15 @@ namespace TaskManagement.DAL
         [PropertyMap(nameof(StatoEsecuzioneId))]
         public abstract TaskStatoEsecuzione StatoEsecuzione { get; }
 
+        public abstract sbyte IsManuale { get; set; }
+
+        /// <summary>
+        /// Se valorizzato puo' contenere un override dei parametri letti da DB. JSON: {"Parametri":[{"Chiave": "chiave1", "Valore": "valore1", "ValoreOpzionale"=""}]}
+        /// </summary>
+        [AcceptNull]
+        public abstract string JsonParametriOverride { get; set; }
+
+
         [AutoInsertTimestamp]
         public abstract DateTime DataInserimento { get; }
 

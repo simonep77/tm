@@ -44,10 +44,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Query.cs" />
     <Compile Include="src\TaskDefinizioneLista.cs" />
     <Compile Include="src\TaskDettaglioJobLista.cs" />
     <Compile Include="src\TaskEsecuzioneLista.cs" />
     <Compile Include="src\TaskFileLista.cs" />
+    <Compile Include="src\TaskParametroCondiviso.cs" />
     <Compile Include="src\TaskParametroLista.cs" />
     <Compile Include="src\TaskDettaglioJob.cs" />
     <Compile Include="src\TaskSchedulazionePianoLista.cs" />

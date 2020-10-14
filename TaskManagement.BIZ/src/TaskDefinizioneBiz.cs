@@ -114,7 +114,36 @@ namespace TaskManagement.BIZ.src
             //Parametri
             foreach (var item in this.Parametri.Value)
             {
-                task.Runtime.UserParams.Add(item.Chiave, new Interface.TaskRuntimeParametro(item.Chiave,item.Valore, item.Visibile));
+                //Imposta di base i parametri specifici
+                var rtParam = new Interface.TaskRuntimeParametro();
+                rtParam.Chiave = item.Chiave;
+                rtParam.IsCondiviso = (item.IsCondiviso > 0);
+                rtParam.IsVisibile = item.Visibile;
+                rtParam.Valore = item.Valore;
+                rtParam.ValoreOpzionale = item.ValoreOpzionale;
+                
+                if (rtParam.IsCondiviso)
+                {
+                    //Carica parametro condiviso
+                    var paramCondiviso = this.Slot.LoadObjByKEY<TaskParametroCondiviso>(TaskParametroCondiviso.KEY_CHIAVE, item.Chiave);
+                    //Aggiunge ad elenco
+                    rtParam.Valore = paramCondiviso.Valore;
+                    rtParam.ValoreOpzionale = paramCondiviso.Valore;
+                   
+                }
+                else
+                {
+                    //Qui in caso di esecuzione pianificata potrebbero essere passati parametri di override
+                    if (this.IsRunningUnderSchedule)
+                    {
+                        if(!string.IsNullOrWhiteSpace(this.mPianoSched.JsonParametriOverride))
+                        {
+                            //TDO da implementare
+                            throw new NotImplementedException("Non ancora implementato");
+                        }
+                    }
+                }
+                task.Runtime.UserParams.Add(item.Chiave, rtParam);
             }
 
             task.Runtime.TaskStartDate = this.mEsecuzione.DataInserimento;
@@ -151,18 +180,11 @@ namespace TaskManagement.BIZ.src
             this.mEsecuzione.SchedPianoId = this.PianoSchedulazioneId;//Eventuale dipendenza da job in esecuzione
             this.Slot.SaveObject(this.mEsecuzione);
 
-            //Se impostato un piano di schedulazione 
-            if (this.IsRunningUnderSchedule && (this.IsJob || !this.IsRunningUnderJob))
-            {
+            //Se schedulato comunque carica il piano di riferimento
+            if (this.IsRunningUnderSchedule)
                 this.mPianoSched = this.Slot.LoadObjByPK<TaskSchedulazionePiano>(this.PianoSchedulazioneId);
 
-                //Se la schedulazione risulta gia' avviata = ERRORE
-                if (this.mPianoSched.StatoEsecuzioneId != (short)EStatoEsecuzione.PS_Pianificato)
-                    throw new ApplicationException($"Attenzione! la schedulazione del task {this.DataObj.Id} {this.DataObj.Nome} del {this.mPianoSched.DataEsecuzione:dd/MM/yyyy HH:mm} risulta gia' avviata/eseguita");
 
-                this.mPianoSched.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_InEsecuzione; 
-                this.Slot.SaveObject(this.mPianoSched);
-            }
         }
 
         /// <summary>
@@ -175,14 +197,6 @@ namespace TaskManagement.BIZ.src
             this.mEsecuzione.ReturnCode = code;
             this.mEsecuzione.ReturnMessage = message;
             this.Slot.SaveObject(this.mEsecuzione);
-
-            //Se impostato un piano di schedulazione lo conclude aggiornando lo stato
-            if (this.IsRunningUnderSchedule && (this.IsJob || !this.IsRunningUnderJob))
-            {
-                this.mPianoSched.StatoEsecuzioneId = code == (int)ETaskReturnCode.OK ? (short)EStatoEsecuzione.PS_TerminatoConSuccesso : (short)EStatoEsecuzione.PS_TerminatoConErrori;
-                this.Slot.SaveObject(this.mPianoSched);
-            }
-
         }
 
 
@@ -415,28 +429,30 @@ namespace TaskManagement.BIZ.src
             if (string.IsNullOrWhiteSpace(this.DataObj.CronString))
                 throw new ArgumentException("Errore ReBuildSchedulePlan - nessuna stringa cron di schedulazione impostata");
 
-            var planOut = new List<TaskSchedulazionePiano>();
+            var newPlan = new List<TaskSchedulazionePiano>();
 
             var cronExpr = NCrontab.CrontabSchedule.Parse(this.DataObj.CronString);
 
-            var dates = cronExpr.GetNextOccurrences(DateTime.Now, planDateEnd);
+            var dateStart = DateTime.Now;
 
-            var plan = this.Slot.CreateList<TaskSchedulazionePianoLista>()
+            var dates = cronExpr.GetNextOccurrences(dateStart, planDateEnd);
+
+            var currPlan = this.Slot.CreateList<TaskSchedulazionePianoLista>()
                 .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id)
-                .And(Filter.In(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato, EStatoEsecuzione.PS_InEsecuzione)));
+                .And(Filter.Eq(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato)));
 
             //Verifico esistenza match piano gia' creato che non verra' modificato
             foreach (var dt in dates)
             {
                 //Cerca schedulazione
-                var sched = plan.Where(d => d.DataEsecuzione == dt);
+                var sched = currPlan.Where(d => d.DataEsecuzione == dt);
 
                 if (sched.Any())
                 {
                     //Rimuove da elenco
                     var plExist = sched.First();
-                    planOut.Add(plExist);
-                    plan.Remove(plExist);
+                    newPlan.Add(plExist);
+                    currPlan.Remove(plExist);
                     continue;
                 }
                 //Crea nuova schedulazione
@@ -445,21 +461,28 @@ namespace TaskManagement.BIZ.src
                 plNew.DataEsecuzione = dt;
                 plNew.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_Pianificato;
                 this.Slot.SaveObject(plNew);
-                planOut.Add(plNew);
+                newPlan.Add(plNew);
 
             }
 
-            //Imposta come saltati i piani non verificati
-            foreach (var item in plan)
-            {
-                if (item.StatoEsecuzioneId != (short)EStatoEsecuzione.PS_Pianificato)
-                    continue;
+            //Marca come saltate le schedulazioni passate non avviate (sia manuali che automatiche)
+            var pastOldPlan = currPlan.FindAllByPropertyFilter(Filter.Lt(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart));
+            //Individua le future manuali da non eliminare
+            var nextManPlan = currPlan.FindAllByPropertyFilter(Filter.Gte(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 1)));
+            //Individua le future non piu' schedulate
+            var nextOldPlan = currPlan.FindAllByPropertyFilter(Filter.Gte(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 0)));
 
-                item.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_Saltato;
-                this.Slot.SaveObject(item);
-            }
+            //Aggiunge le manuali future alle automatiche rivalutate
+            newPlan.AddRange(nextManPlan);
 
-            return planOut;
+            //Imposta le vecchie saltate
+            pastOldPlan.SetPropertyMassive(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), (short)EStatoEsecuzione.PS_Saltato);
+            this.Slot.SaveAll(pastOldPlan);
+
+            //Elimina le schedulazioni future automatiche che non dovranno essere eseguite
+            this.Slot.DeleteAll(nextOldPlan);
+
+            return newPlan;
         }
      
 
