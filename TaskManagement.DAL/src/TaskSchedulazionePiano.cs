@@ -4,7 +4,7 @@ using System;
 
 namespace TaskManagement.DAL
 {
-    [Table("TaskSchedulazioni_Piano")]
+    [Table("taskschedulazioni_piano")]
     public abstract class TaskSchedulazionePiano : DataObject<TaskSchedulazionePiano>
     {
         public const string KEY_RUN_DATE = @"KEY_RUN_DATE";

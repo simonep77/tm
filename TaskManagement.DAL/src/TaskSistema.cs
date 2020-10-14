@@ -3,7 +3,7 @@ using Bdo.Objects;
 
 namespace TaskManagement.DAL
 {
-    [Table("TaskSistemi"), GlobalCache()]
+    [Table("tasksistemi"), GlobalCache()]
     public abstract class TaskSistema : DataObject<TaskSistema>
     {
         [PrimaryKey()]

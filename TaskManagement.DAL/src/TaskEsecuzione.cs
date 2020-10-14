@@ -4,7 +4,7 @@ using Bdo.Objects;
 
 namespace TaskManagement.DAL
 {
-    [Table("TaskEsecuzioni")]
+    [Table("taskesecuzioni")]
     public abstract class TaskEsecuzione : DataObject<TaskEsecuzione>
     {
         [PrimaryKey()]

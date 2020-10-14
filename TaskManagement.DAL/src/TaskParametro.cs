@@ -3,7 +3,7 @@ using Bdo.Objects;
 
 namespace TaskManagement.DAL
 {
-    [Table("TaskParametri")]
+    [Table("taskparametri")]
     public abstract class TaskParametro : DataObject<TaskParametro>
     {
         [PrimaryKey()]

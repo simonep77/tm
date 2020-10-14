@@ -4,7 +4,7 @@ using Bdo.Objects;
 
 namespace TaskManagement.DAL
 {
-    [Table("TaskDefinizioni")]
+    [Table("taskdefinizioni")]
     public abstract class TaskDefinizione : DataObject<TaskDefinizione>
     {
         public const string KEY_NOME = @"KEY_NOME";

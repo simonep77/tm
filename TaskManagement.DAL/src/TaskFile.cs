@@ -4,7 +4,7 @@ using Bdo.Objects;
 
 namespace TaskManagement.DAL
 {
-    [Table("TaskFiles")]
+    [Table("taskfiles")]
     public abstract class TaskFile : DataObject<TaskFile>
     {
         public const string KEY_EXEC = @"KEY_EXEC";
