@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set di attributi. Modificare i valori di questi attributi per modificare le informazioni
 // associate a un assembly.
 [assembly: AssemblyTitle("TaskManagement.BIZ")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Business lgic layer TM")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TaskManagement.BIZ")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyCopyright("Copyright Simone Pelaia ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
