@@ -1,9 +1,9 @@
 @echo off
 
-echo INSTALLAZIONE SERVIZIO ERD SCHEDULER (ERD-Scheduler)
+echo INSTALLAZIONE SERVIZIO TM SCHEDULER (TM-Scheduler) deve essere eseguito come amministratore
 
-EasyReportDispatcher_SCHEDULER.exe /install
+Taskmanagement.Scheduler.exe /install
 
-net start ERD-Scheduler
+net start TM-Scheduler
 
 pause

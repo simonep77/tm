@@ -1,9 +1,10 @@
 @echo off
 
-echo DISINSTALLAZIONE SERVIZIO ERD SCHEDULER (ERD-Scheduler)
+echo DISINSTALLAZIONE SERVIZIO TM SCHEDULER (TM-Scheduler) deve essere eseguito come amministratore
 
-net stop ERD-Scheduler
+net stop TM-Scheduler
 
-EasyReportDispatcher_SCHEDULER.exe /uninstall
+Taskmanagement.Scheduler.exe /uninstall
+
 
 pause

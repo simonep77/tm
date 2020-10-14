@@ -1,7 +1,7 @@
 @echo off
 
-echo AVVIO SERVIZIO ERD SCHEDULER CONSOLE
+echo AVVIO SERVIZIO TM SCHEDULER CONSOLE
 
-EasyReportDispatcher_SCHEDULER.exe /console
+Taskmanagement.Scheduler.exe /console
 
 pause
