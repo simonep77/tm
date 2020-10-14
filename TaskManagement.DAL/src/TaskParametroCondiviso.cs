@@ -15,8 +15,6 @@ namespace TaskManagement.DAL
         [MaxLength(50)]
         public abstract string Chiave { get; set; }
 
-        public abstract short TipoId { get; set; }
-
 
         [MinLength(1)]
         public abstract string Valore { get; set; }

@@ -38,7 +38,7 @@ namespace TaskManagement.DAL
         [MinLength(1)]
         [MaxLength(250)]
         public abstract string DatiDir { get; set; }
-        public abstract bool MostraConsole { get; set; }
+        public abstract sbyte MostraConsole { get; set; }
         public abstract short TipoNotificaId { get; set; }
         [AcceptNull()]
         [MaxLength(50)]

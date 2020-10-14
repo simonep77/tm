@@ -102,7 +102,8 @@ namespace TaskManagement.BIZ.src
             task.Runtime.TaskPID = this.mThisProcess.Id;
 
             task.Runtime.LogFileName = Path.Combine(this.DataObj.LogDir, $"{this.getLogFileNameBase()}_{DateTime.Now:yyyyMMdd_HHmmss}.log");
-            
+            task.Runtime.TaskStartDate = this.mEsecuzione.DataInserimento;
+
             if (this.DataObj.TipoNotificaId == (int)ETipoNotificaEsito.Email)
             {
                 task.Runtime.SysMailFROM = this.DataObj.TaskClass;
@@ -111,42 +112,45 @@ namespace TaskManagement.BIZ.src
                 task.Runtime.SysMailBCC = this.DataObj.TaskClass;
             }
 
-            //Parametri
-            foreach (var item in this.Parametri.Value)
+            //Parametri validi solo su tipo task class
+            if (this.DataObj.TipoTaskId == (short)ETipoTask.TaskClass)
             {
-                //Imposta di base i parametri specifici
-                var rtParam = new Interface.TaskRuntimeParametro();
-                rtParam.Chiave = item.Chiave;
-                rtParam.IsCondiviso = (item.IsCondiviso > 0);
-                rtParam.IsVisibile = item.Visibile;
-                rtParam.Valore = item.Valore;
-                rtParam.ValoreOpzionale = item.ValoreOpzionale;
-                
-                if (rtParam.IsCondiviso)
+                foreach (var item in this.Parametri.Value)
                 {
-                    //Carica parametro condiviso
-                    var paramCondiviso = this.Slot.LoadObjByKEY<TaskParametroCondiviso>(TaskParametroCondiviso.KEY_CHIAVE, item.Chiave);
-                    //Aggiunge ad elenco
-                    rtParam.Valore = paramCondiviso.Valore;
-                    rtParam.ValoreOpzionale = paramCondiviso.Valore;
-                   
-                }
-                else
-                {
-                    //Qui in caso di esecuzione pianificata potrebbero essere passati parametri di override
-                    if (this.IsRunningUnderSchedule)
+                    //Imposta di base i parametri specifici
+                    var rtParam = new Interface.TaskRuntimeParametro();
+                    rtParam.Chiave = item.Chiave;
+                    rtParam.IsCondiviso = (item.IsCondiviso > 0);
+                    rtParam.IsVisibile = item.Visibile;
+                    rtParam.Valore = item.Valore;
+                    rtParam.ValoreOpzionale = item.ValoreOpzionale;
+
+                    if (rtParam.IsCondiviso)
                     {
-                        if(!string.IsNullOrWhiteSpace(this.mPianoSched.JsonParametriOverride))
+                        //Carica parametro condiviso
+                        var paramCondiviso = this.Slot.LoadObjByKEY<TaskParametroCondiviso>(TaskParametroCondiviso.KEY_CHIAVE, item.Chiave);
+                        //Aggiunge ad elenco
+                        rtParam.Valore = paramCondiviso.Valore;
+                        rtParam.ValoreOpzionale = paramCondiviso.Valore;
+
+                    }
+                    else
+                    {
+                        //Qui in caso di esecuzione pianificata potrebbero essere passati parametri di override
+                        if (this.IsRunningUnderSchedule)
                         {
-                            //TDO da implementare
-                            throw new NotImplementedException("Non ancora implementato");
+                            if (!string.IsNullOrWhiteSpace(this.mPianoSched.JsonParametriOverride))
+                            {
+                                //TDO da implementare
+                                throw new NotImplementedException("Non ancora implementato");
+                            }
                         }
                     }
+                    task.Runtime.UserParams.Add(item.Chiave, rtParam);
                 }
-                task.Runtime.UserParams.Add(item.Chiave, rtParam);
             }
 
-            task.Runtime.TaskStartDate = this.mEsecuzione.DataInserimento;
+
 
             //Esegue le azioni propedeutiche all'avvio (creazione dirs)
             Directory.CreateDirectory(this.DataObj.LogDir);
@@ -158,7 +162,7 @@ namespace TaskManagement.BIZ.src
             if (this.ParentJobEsecuzioneId == 0L)
             {
                 Console.Title = $"{this.DataObj.Sistema.Nome} - {this.DataObj.Nome} (PID: {this.mThisProcess.Id})";
-                ConsoleHelper.SetVisible(Console.Title, this.DataObj.MostraConsole);
+                ConsoleHelper.SetVisible(Console.Title, (this.DataObj.MostraConsole > 0));
             }
 
             //Inizializza

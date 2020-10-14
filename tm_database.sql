@@ -30,7 +30,7 @@ CREATE TABLE `taskdefinizioni` (
   `TaskClass` varchar(100) NOT NULL,
   `LogDir` varchar(250) NOT NULL,
   `DatiDir` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `MostraConsole` bit(1) NOT NULL DEFAULT b'1',
+  `MostraConsole` tinyint(1) NOT NULL DEFAULT '1',
   `TipoNotificaId` smallint NOT NULL,
   `MailFROM` text,
   `MailTO` text,
@@ -57,9 +57,9 @@ CREATE TABLE `taskdefinizioni` (
 /*Data for the table `taskdefinizioni` */
 
 insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`Eliminato`,`SchedCronString`,`DataInizio`,`DataFine`) values 
-(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio','',1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,0,NULL,'2001-01-01','9999-12-31'),
-(2,'TaskNetstat',1,1,2,'netstat.exe','-ano','C:\\WORK\\TaskManData\\Log\\TaskEsterno','C:\\WORK\\TaskManData\\Dati\\TaskEsterno','',1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,'2001-01-01','9999-12-31'),
-(3,'TaskJobProva',1,1,3,'','','C:\\WORK\\TaskManData\\Log\\TaskJob','C:\\WORK\\TaskManData\\Dati\\Taskjob','\0',1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,'47 11,12 * * *','2001-01-01','9999-12-31');
+(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,0,NULL,'2001-01-01','9999-12-31'),
+(2,'TaskNetstat',1,1,2,'netstat.exe','-ano','C:\\WORK\\TaskManData\\Log\\TaskEsterno','C:\\WORK\\TaskManData\\Dati\\TaskEsterno',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,'2001-01-01','9999-12-31'),
+(3,'TaskJobProva',1,1,3,'','','C:\\WORK\\TaskManData\\Log\\TaskJob','C:\\WORK\\TaskManData\\Dati\\Taskjob',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,'47 11,12 * * *','2001-01-01','9999-12-31');
 
 /*Table structure for table `taskdettaglijob` */
 
@@ -157,40 +157,28 @@ CREATE TABLE `taskparametri` (
 
 /*Data for the table `taskparametri` */
 
+insert  into `taskparametri`(`TaskDefId`,`IsCondiviso`,`Chiave`,`Valore`,`ValoreOpzionale`,`Visibile`) values 
+(1,1,'CN_CASAGIT_2000','',NULL,0),
+(1,0,'PIPPO','PLUTO',NULL,1);
+
 /*Table structure for table `taskparametricondivisi` */
 
 DROP TABLE IF EXISTS `taskparametricondivisi`;
 
 CREATE TABLE `taskparametricondivisi` (
   `Id` int NOT NULL,
-  `TipoId` smallint NOT NULL COMMENT 'Definizione del tipo di parametro (es. 1 connectionstring, 2 url)',
   `Chiave` varchar(100) NOT NULL COMMENT 'Identificativo univoco',
   `Valore` text NOT NULL COMMENT 'A seconda del tipo assume il valore di riferimento',
   `ValoreOpzionale` text COMMENT 'Ulteriore valore a supporto',
   `Note` text,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `Chiave` (`Chiave`),
-  KEY `TipoId` (`TipoId`),
-  CONSTRAINT `taskparametricondivisi_ibfk_1` FOREIGN KEY (`TipoId`) REFERENCES `taskparametricondivisi_tipi` (`Id`)
+  UNIQUE KEY `Chiave` (`Chiave`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `taskparametricondivisi` */
 
-/*Table structure for table `taskparametricondivisi_tipi` */
-
-DROP TABLE IF EXISTS `taskparametricondivisi_tipi`;
-
-CREATE TABLE `taskparametricondivisi_tipi` (
-  `Id` smallint NOT NULL,
-  `Nome` varchar(100) NOT NULL,
-  PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-/*Data for the table `taskparametricondivisi_tipi` */
-
-insert  into `taskparametricondivisi_tipi`(`Id`,`Nome`) values 
-(1,'Stringa di connessione DB'),
-(2,'URL generico');
+insert  into `taskparametricondivisi`(`Id`,`Chiave`,`Valore`,`ValoreOpzionale`,`Note`) values 
+(1,'CN_CASAGIT_2000','Prova','Prova',NULL);
 
 /*Table structure for table `taskschedulazioni_piano` */
 
