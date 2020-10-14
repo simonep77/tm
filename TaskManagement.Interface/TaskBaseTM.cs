@@ -270,7 +270,7 @@ namespace TaskManagement.Interface
             WriteLog(string.Empty);
             foreach (var item in this.Runtime.UserParams.Values)
             {
-                WriteLog("  * {0} => {1}", item.Chiave.PadRight(I_PAD_LEN), item.IsVisibile ? item.Valore : @"**********");
+                WriteLog("  * {0} => {1} {2}", item.Chiave.PadRight(I_PAD_LEN), item.IsVisibile ? item.Valore : @"**********", item.ValoreOpzionale);
             }
 
             WriteLog(STR_LOG_SEP);
