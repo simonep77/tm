@@ -132,7 +132,14 @@ namespace Taskmanagement.Scheduler.Svcs
                 sb.AppendLine();
             }
 
-            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"Schedulazioni caricate: {trsOrdered.Count()}");
+
+            if (AppContextTM.Service.RunMode == CostantiSched.RunMode.Console)
+            {
+                AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"Schedulazioni caricate: {trsOrdered.Count()}");
+                AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, sb.ToString());
+            }
+            else
+                AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"Schedulazioni caricate: {trsOrdered.Count()}");
 
         }
 
@@ -155,7 +162,6 @@ namespace Taskmanagement.Scheduler.Svcs
                 var matcher = GroupMatcher<JobKey>.GroupContains(JOB_TASKS_GROUP);
                 var jobkeys = await this.mScheduler.GetJobKeys(matcher);
                 var trigDiz = new Dictionary<string, TriggerStatus>();
-                int iNumSched = 0;
 
                 using (var slot = AppContextTM.Service.CreateSlot())
                 {
@@ -179,7 +185,6 @@ namespace Taskmanagement.Scheduler.Svcs
                         .And(Filter.Lte(nameof(TaskDefinizione.DataInizio), DateTime.Today)
                         .And(Filter.Gte(nameof(TaskDefinizione.DataFine), DateTime.Today))));
 
-                    iNumSched = tasks.Count;
                     var dtPlanStart = DateTime.Now;
                     var dtPlanEnd = dtPlanStart.AddDays(AppContextTM.SCHEDULE_EXECUTION_PLAN_DAYS);
 
@@ -233,10 +238,8 @@ namespace Taskmanagement.Scheduler.Svcs
 
                 }
 
-                if (AppContextTM.Service.RunMode == CostantiSched.RunMode.Console)
-                    this.printSchedules();
-                else
-                    AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"Caricate {iNumSched} schedulazioni");
+                this.printSchedules();
+
             }
             finally
             {
