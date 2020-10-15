@@ -23,7 +23,7 @@ namespace Taskmanagement.Scheduler.Svcs
 
         public MainService(): base(@"TM-Scheduler")
         {
-            this.ServiceInfo.DisplayName = @"Task management Scheduler";
+            this.ServiceInfo.DisplayName = @"Task Management Scheduler";
             this.ServiceInfo.Description = @"Servizio residente per la gestione dei task schedulati TM";
             this.ServiceInfo.ServiceAccount = System.ServiceProcess.ServiceAccount.LocalSystem;
             this.ServiceInfo.ServiceStartMode = System.ServiceProcess.ServiceStartMode.Automatic;
