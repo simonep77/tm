@@ -131,7 +131,7 @@ namespace TaskManagement.BIZ.src
                         var paramCondiviso = this.Slot.LoadObjByKEY<TaskParametroCondiviso>(TaskParametroCondiviso.KEY_CHIAVE, item.Chiave);
                         //Aggiunge ad elenco
                         rtParam.Valore = paramCondiviso.Valore;
-                        rtParam.ValoreOpzionale = paramCondiviso.Valore;
+                        rtParam.ValoreOpzionale = paramCondiviso.ValoreOpzionale;
 
                     }
                     else
