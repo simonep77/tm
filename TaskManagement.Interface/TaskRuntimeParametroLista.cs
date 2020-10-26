@@ -9,7 +9,7 @@ namespace TaskManagement.Interface
     public class TaskRuntimeParametroLista : MarshalByRefObject, ITaskRuntimeParametroLista
     {
         private IDictionary<string, ITaskRuntimeParametro> mDiz = new Dictionary<string, ITaskRuntimeParametro>();
-        ITaskRuntimeParametro IDictionary<string, ITaskRuntimeParametro>.this[string key] { get => throw new NotImplementedException(); set => this.mDiz[key] = value; }
+        ITaskRuntimeParametro IDictionary<string, ITaskRuntimeParametro>.this[string key] { get => this.mDiz.ContainsKey(key) ? this.mDiz[key] : null; set => this.mDiz[key] = value; }
 
         ICollection<string> IDictionary<string, ITaskRuntimeParametro>.Keys => this.mDiz.Keys;
 
