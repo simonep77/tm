@@ -287,11 +287,13 @@ namespace TaskManagement.Interface
 
             foreach (var item in segGrouped)
             {
-                WriteLog($"{item.Key.ToString().ToUpper().PadRight(12, ' ')}: {item.Count()}");
+                string tipo = Enum.GetName(typeof(ETipoSegnalazione), item.Key).ToUpper();
+
+                WriteLog($"n. {tipo.PadRight(12, ' ')}: {item.Count()}");
 
                 foreach (var seg in item)
                 {
-                    this.WriteLog($"  > {seg.Tipo} - {seg.TipoEntita} - {seg.ChiaveEntita} - {seg.Testo}");
+                    this.WriteLog($"  > {tipo} - {seg.TipoEntita} - {seg.ChiaveEntita} - {seg.Testo}");
                 }
             WriteLog(string.Empty);
             WriteLog(string.Empty);

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace TaskManagement.Common
 {
+    /// <summary>
+    /// Indica il tipo di segnalazione effettuato
+    /// </summary>
     public enum ETipoSegnalazione: short
     {
        Info = 1,
