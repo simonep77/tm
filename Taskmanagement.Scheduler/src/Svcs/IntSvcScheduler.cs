@@ -33,7 +33,7 @@ namespace Taskmanagement.Scheduler.Svcs
         {
             var role = AppContextTM.SCHEDULE_MASTER_NODE ? "Ruolo: MASTER [Gestione piano schedulazione ed esecuzione dei task senza nodo assegnato]" : "Ruolo: SLAVE [esecuzione dei soli task assegnati esplicitamente]";
             AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job inizializzazione...");
-            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job inizializzazione...");
+            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, role);
             //Crea lo scheduler principale
             this.mScheduler = await (new StdSchedulerFactory()).GetScheduler();
             //Aggiunge listener per i task
@@ -113,10 +113,7 @@ namespace Taskmanagement.Scheduler.Svcs
                 var nodo = slot.LoadObjNullByKEY<TaskNodo>(TaskNodo.KEY_HOST, Environment.MachineName);
 
                 if (nodo == null)
-                {
-                    AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Error, $"Nodo non registrato. Eseguire preventivamente {Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName)} /register");
-                    Environment.Exit(1);
-                }
+                    return;
 
                 //Aggiorna
                 nodo.RunEnd = DateTime.Now;
@@ -162,12 +159,12 @@ namespace Taskmanagement.Scheduler.Svcs
         async public void Stop()
         {
             AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job in chiusura...");
+            //Chiude info nodo
+            this.terminaNodo();
             //Stoppa schedulatore
             await this.mScheduler.PauseAll();
             //await this.mScheduler.Clear();
             await this.mScheduler.Shutdown(true);
-            //Chiude info nodo
-            this.terminaNodo();
             AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job terminato");
         }
 
