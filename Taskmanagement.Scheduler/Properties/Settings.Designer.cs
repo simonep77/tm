@@ -50,15 +50,12 @@ namespace Taskmanagement.Scheduler.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool MasterNode {
             get {
                 return ((bool)(this["MasterNode"]));
-            }
-            set {
-                this["MasterNode"] = value;
             }
         }
     }
