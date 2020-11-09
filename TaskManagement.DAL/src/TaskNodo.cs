@@ -20,14 +20,17 @@ namespace TaskManagement.DAL
         [AcceptNull]
         public abstract string Note { get; set; }
 
+        [AcceptNull, MaxLength(10)]
+        public abstract string RunPID { get; set; }
+
         [AcceptNull]
         public abstract DateTime RunStart { get; set; }
+        
+        public abstract sbyte RunIsMaster { get; set; }
         
         [AcceptNull]
         public abstract DateTime RunEnd { get; set; }
 
-        [AcceptNull, MaxLength(10)]
-        public abstract string RunPID { get; set; }
         [AutoUpdateTimestamp]
         public abstract DateTime DataAggiornamento { get; set; }
 

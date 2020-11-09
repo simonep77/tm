@@ -98,6 +98,7 @@ namespace Taskmanagement.Scheduler.Svcs
                 //Legge
                 this.Node_ID = nodo.Id;
                 //Aggiorna
+                nodo.RunIsMaster = AppContextTM.SCHEDULE_MASTER_NODE ? (sbyte)1 : (sbyte)0;
                 nodo.RunStart = DateTime.Now;
                 nodo.RunEnd = DateTime.MinValue;
                 nodo.RunPID = Process.GetCurrentProcess().Id.ToString();

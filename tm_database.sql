@@ -151,9 +151,10 @@ CREATE TABLE `tasknodi` (
   `Hostname` varchar(50) NOT NULL,
   `FQDN` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `Note` text,
+  `RunIsMaster` tinyint NOT NULL DEFAULT '0',
+  `RunPID` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `RunStart` datetime DEFAULT NULL,
   `RunEnd` datetime DEFAULT NULL,
-  `RunPID` varchar(10) DEFAULT NULL,
   `DataAggiornamento` datetime NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Hostname` (`Hostname`)
@@ -177,6 +178,7 @@ CREATE TABLE `taskparametri` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `taskparametri` */
+
 
 
 /*Table structure for table `taskparametricondivisi` */
