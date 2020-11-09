@@ -22,6 +22,7 @@ namespace Taskmanagement.Scheduler
         public static readonly int SCHEDULE_FORCED_UPDATE_CHECK_SECONDS = Settings.Default.SecondiCheckModificheSchedulazioni;
         public static readonly int SCHEDULE_RESULT_CHECK_MINUTES = 10;
         public static readonly int SCHEDULE_EXECUTION_PLAN_DAYS = 2;
+        public static readonly bool SCHEDULE_MASTER_NODE = Settings.Default.MasterNode;
 
         public static readonly string TASKWORKER_EXE = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"TaskManagement.Worker.exe");
 

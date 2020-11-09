@@ -64,6 +64,12 @@ namespace TaskManagement.DAL
         [AcceptNull()]
         public abstract string SchedCronString { get; set; }
 
+        [AcceptNull()]
+        public abstract int SchedNodoId { get; set; }
+
+        [PropertyMap(nameof(SchedNodoId))]
+        public abstract TaskNodo SchedNodo { get; }
+
         public abstract DateTime DataInizio { get; set; }
         [AcceptNull()]
         public abstract DateTime DataFine { get; set; }

@@ -13,7 +13,7 @@ namespace Taskmanagement.Scheduler
         {
             AppContextTM.Service.RunByMode(searchRunMode(args));
 
-            return 0;
+            return Environment.ExitCode;
         }
 
 

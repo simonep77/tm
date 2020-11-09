@@ -42,6 +42,7 @@ CREATE TABLE `taskdefinizioni` (
   `MantieniNumLogFS` int NOT NULL DEFAULT '60',
   `Eliminato` tinyint(1) NOT NULL DEFAULT '0',
   `SchedCronString` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SchedNodoId` int DEFAULT NULL COMMENT 'Id del nodo slave che deve eseguire il task schedulato',
   `DataInizio` date NOT NULL DEFAULT '2001-01-01',
   `DataFine` date NOT NULL DEFAULT '9999-12-31',
   PRIMARY KEY (`Id`),
@@ -49,18 +50,19 @@ CREATE TABLE `taskdefinizioni` (
   KEY `SistemaId` (`SistemaId`),
   KEY `TipoNotificaId` (`TipoNotificaId`),
   KEY `TipoTaskId` (`TipoTaskId`),
+  KEY `SchedNodoId` (`SchedNodoId`),
   CONSTRAINT `taskdefinizioni_ibfk_1` FOREIGN KEY (`SistemaId`) REFERENCES `tasksistemi` (`Id`),
   CONSTRAINT `taskdefinizioni_ibfk_2` FOREIGN KEY (`TipoNotificaId`) REFERENCES `tasktipinotifiche` (`Id`),
-  CONSTRAINT `taskdefinizioni_ibfk_3` FOREIGN KEY (`TipoTaskId`) REFERENCES `tasktipitask` (`Id`)
+  CONSTRAINT `taskdefinizioni_ibfk_3` FOREIGN KEY (`TipoTaskId`) REFERENCES `tasktipitask` (`Id`),
+  CONSTRAINT `taskdefinizioni_ibfk_4` FOREIGN KEY (`SchedNodoId`) REFERENCES `tasknodi` (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `taskdefinizioni` */
 
-insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`Eliminato`,`SchedCronString`,`DataInizio`,`DataFine`) values 
-(1,'TaskProva',1,1,1,'C:\\Users\\simone.pelaia\\source\\repos\\simonep77\\tm\\TaskEsempio\\bin\\Debug\\TaskEsempio.dll','TaskEsempio.TaskProva','C:\\WORK\\TaskManData\\Log\\TaskEsempio','C:\\WORK\\TaskManData\\Dati\\TaskEsempio',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,0,NULL,'2001-01-01','9999-12-31'),
-(2,'TaskNetstat',1,1,2,'netstat.exe','-ano','C:\\WORK\\TaskManData\\Log\\TaskEsterno','C:\\WORK\\TaskManData\\Dati\\TaskEsterno',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,'2001-01-01','9999-12-31'),
-(3,'TaskJobProva',1,1,3,'','','C:\\WORK\\TaskManData\\Log\\TaskJob','C:\\WORK\\TaskManData\\Dati\\Taskjob',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,'47 11,12 * * *','2001-01-01','9999-12-31');
-
+insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`Eliminato`,`SchedCronString`,`SchedNodoId`,`DataInizio`,`DataFine`) values 
+(1,'TaskProva',1,1,1,'E:\\applicazioni_data\\task_management\\assembly\\TaskProva\\TaskEsempio.dll','TaskEsempio.TaskProva','E:\\applicazioni_data\\task_management\\log\\TaskProva','E:\\applicazioni_data\\task_management\\dati\\TaskProva',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,0,NULL,NULL,'2001-01-01','9999-12-31'),
+(2,'TaskNetstat',1,1,2,'netstat.exe','-ano','E:\\applicazioni_data\\task_management\\log\\TaskEsterno','E:\\applicazioni_data\\task_management\\dati\\TaskEsterno',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,NULL,'2001-01-01','9999-12-31'),
+(3,'TaskJobProva',1,1,3,'','','E:\\applicazioni_data\\task_management\\log\\TaskJob','E:\\applicazioni_data\\task_management\\dati\\Taskjob',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,NULL,'2001-01-01','9999-12-31');
 /*Table structure for table `taskdettaglijob` */
 
 DROP TABLE IF EXISTS `taskdettaglijob`;
@@ -140,6 +142,25 @@ CREATE TABLE `taskfiles` (
 
 /*Data for the table `taskfiles` */
 
+/*Table structure for table `tasknodi` */
+
+DROP TABLE IF EXISTS `tasknodi`;
+
+CREATE TABLE `tasknodi` (
+  `Id` int NOT NULL AUTO_INCREMENT,
+  `Hostname` varchar(50) NOT NULL,
+  `FQDN` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Note` text,
+  `RunStart` datetime DEFAULT NULL,
+  `RunEnd` datetime DEFAULT NULL,
+  `RunPID` varchar(10) DEFAULT NULL,
+  `DataAggiornamento` datetime NOT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `Hostname` (`Hostname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `tasknodi` */
+
 /*Table structure for table `taskparametri` */
 
 DROP TABLE IF EXISTS `taskparametri`;
@@ -157,9 +178,6 @@ CREATE TABLE `taskparametri` (
 
 /*Data for the table `taskparametri` */
 
-insert  into `taskparametri`(`TaskDefId`,`IsCondiviso`,`Chiave`,`Valore`,`ValoreOpzionale`,`Visibile`) values 
-(1,1,'CN_CASAGIT_2000','',NULL,0),
-(1,0,'PIPPO','PLUTO',NULL,1);
 
 /*Table structure for table `taskparametricondivisi` */
 
@@ -177,8 +195,6 @@ CREATE TABLE `taskparametricondivisi` (
 
 /*Data for the table `taskparametricondivisi` */
 
-insert  into `taskparametricondivisi`(`Id`,`Chiave`,`Valore`,`ValoreOpzionale`,`Note`) values 
-(1,'CN_CASAGIT_2000','Prova','Prova',NULL);
 
 /*Table structure for table `taskschedulazioni_piano` */
 
@@ -301,9 +317,9 @@ BEGIN
  SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' ;
  SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 ;
 
-		truncate table taskfiles;
-		truncate table taskesecuzioni;
-		TRUNCATE TABLE taskschedulazioni_piano;
+		 truncate table taskfiles;
+		 truncate table taskesecuzioni;
+		 TRUNCATE TABLE taskschedulazioni_piano;
 		
  SET SQL_MODE=@OLD_SQL_MODE ;
  SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS ;

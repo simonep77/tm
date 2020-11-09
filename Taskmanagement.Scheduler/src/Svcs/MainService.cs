@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Taskmanagement.Scheduler.Common;
+using TaskManagement.DAL;
 
 namespace Taskmanagement.Scheduler.Svcs
 {
@@ -176,7 +177,7 @@ namespace Taskmanagement.Scheduler.Svcs
         {
             bool createdNew;
 
-            this.mMutex = new Mutex(true, AppContextTM.SERVICE_NAME, out createdNew);
+            this.mMutex = new Mutex(true, $"Global\\{AppContextTM.SERVICE_NAME}" , out createdNew);
 
             if (!createdNew)
                 throw new ApplicationException("E' già in esecuzione un'altra istanza dell'applicazione");
@@ -193,6 +194,8 @@ namespace Taskmanagement.Scheduler.Svcs
                 }
             }
         }
+
+
 
         #endregion
     }

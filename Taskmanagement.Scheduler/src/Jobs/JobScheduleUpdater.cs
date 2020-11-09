@@ -59,7 +59,7 @@ namespace EasyReportDispatcher_SCHEDULER.src.Jobs
 
         private void updateSchedules()
         {
-            AppContextTM.Service.InternalScheduler.ReloadReportSchedules();
+            AppContextTM.Service.InternalScheduler.ReloadSchedules();
         }
 
 

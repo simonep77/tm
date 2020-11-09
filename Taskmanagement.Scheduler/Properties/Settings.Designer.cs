@@ -49,5 +49,17 @@ namespace Taskmanagement.Scheduler.Properties {
                 return ((int)(this["SecondiCheckModificheSchedulazioni"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool MasterNode {
+            get {
+                return ((bool)(this["MasterNode"]));
+            }
+            set {
+                this["MasterNode"] = value;
+            }
+        }
     }
 }

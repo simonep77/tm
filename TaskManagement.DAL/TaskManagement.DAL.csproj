@@ -46,7 +46,9 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Query.cs" />
+    <Compile Include="src\TaskNodoLista.cs" />
     <Compile Include="src\TaskDefinizioneLista.cs" />
+    <Compile Include="src\TaskNodo.cs" />
     <Compile Include="src\TaskDettaglioJobLista.cs" />
     <Compile Include="src\TaskEsecuzioneLista.cs" />
     <Compile Include="src\TaskFileLista.cs" />

@@ -5,6 +5,8 @@ using Quartz.Impl;
 using Quartz.Impl.Matchers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Taskmanagement.Scheduler.Common;
@@ -25,10 +27,12 @@ namespace Taskmanagement.Scheduler.Svcs
         public string Schedule_Last_Auto_Hash { get; set; } = string.Empty;
         public string Schedule_Last_Manual_Hash { get; set; } = string.Empty;
         public DateTime Schedule_Last_Refresh { get; set; } = DateTime.MinValue;
-
+        public int Node_ID { get; set; }
 
         async public void Start()
         {
+            var role = AppContextTM.SCHEDULE_MASTER_NODE ? "Ruolo: MASTER [Gestione piano schedulazione ed esecuzione dei task senza nodo assegnato]" : "Ruolo: SLAVE [esecuzione dei soli task assegnati esplicitamente]";
+            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job inizializzazione...");
             AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job inizializzazione...");
             //Crea lo scheduler principale
             this.mScheduler = await (new StdSchedulerFactory()).GetScheduler();
@@ -36,9 +40,98 @@ namespace Taskmanagement.Scheduler.Svcs
             this.mScheduler.ListenerManager.AddJobListener(new JobListenerSystem(), GroupMatcher<JobKey>.GroupContains(JOB_INTERNAL_GROUP));
             this.mScheduler.ListenerManager.AddJobListener(new JobListenerTask(), GroupMatcher<JobKey>.GroupContains(JOB_TASKS_GROUP));
             await this.mScheduler.Start();
-            
-            //Crea e schedula i job di sistema
 
+            //Registra proprio accesso
+            this.caricaDatiNodo();
+
+            //Crea e schedula i job di sistema
+            this.avviaSchedulazioniSistema();
+
+            // 3) Il job di check esiti schedulazione
+            //trg = TriggerBuilder
+            //    .Create()
+            //    .WithIdentity(CostantiSched.Quartz.TriggerNames.System.ScheduleResultCheck, TRIGGER_INTERNAL_GROUP)
+            //    .WithSchedule(SimpleScheduleBuilder.RepeatMinutelyForever(AppContextTM.SCHEDULE_RESULT_CHECK_MINUTES))
+            //    //.StartAt(DateTime.Now.ToUniversalTime().AddMinutes(AppContextERD.SCHEDULE_RESULT_CHECK_MINUTES))
+            //    .Build();
+
+            //jobDett = new JobDetailImpl(CostantiSched.Quartz.JobNames.System.ScheduleResultCheck, JOB_INTERNAL_GROUP, typeof(JobScheduleResultChecker));
+            //await this.mScheduler.ScheduleJob(jobDett, trg);
+
+
+            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job avviato");
+        }
+
+        #region GESTIONE NODO
+
+
+        private void caricaDatiNodo()
+        {
+            using (var slot = AppContextTM.Service.CreateSlot())
+            {
+
+                var nodo = slot.LoadObjOrNewByKEY<TaskNodo>(TaskNodo.KEY_HOST, Environment.MachineName);
+
+                if (nodo.ObjectState == EObjectState.New)
+                {
+                    nodo.Hostname = Environment.MachineName;
+
+                    try
+                    {
+                        nodo.FQDN = System.Net.Dns.GetHostEntry("localhost").HostName;
+                    }
+                    catch (Exception ex)
+                    {
+                        AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Warning, $"Errore nell'ottenimento dell'FQDN: {ex.Message}");
+                        nodo.FQDN = Environment.MachineName;
+                    }
+
+                    slot.SaveObject(nodo);
+
+                    AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"Nodo registrato con successo. Id: {nodo.Id}");
+                }
+                else
+                {
+                    AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"Avvio nodo gia' registrato con Id: {nodo.Id}");
+                }
+
+                //Legge
+                this.Node_ID = nodo.Id;
+                //Aggiorna
+                nodo.RunStart = DateTime.Now;
+                nodo.RunEnd = DateTime.MinValue;
+                nodo.RunPID = Process.GetCurrentProcess().Id.ToString();
+                slot.SaveObject(nodo);
+            }
+        }
+
+        private void terminaNodo()
+        {
+            using (var slot = AppContextTM.Service.CreateSlot())
+            {
+                var nodo = slot.LoadObjNullByKEY<TaskNodo>(TaskNodo.KEY_HOST, Environment.MachineName);
+
+                if (nodo == null)
+                {
+                    AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Error, $"Nodo non registrato. Eseguire preventivamente {Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName)} /register");
+                    Environment.Exit(1);
+                }
+
+                //Aggiorna
+                nodo.RunEnd = DateTime.Now;
+                slot.SaveObject(nodo);
+            }
+        }
+
+
+        #endregion
+
+
+        /// <summary>
+        /// Il master node si occupa del piano di schedulazione
+        /// </summary>
+        async private void avviaSchedulazioniSistema()
+        {
             // 1) Il job di caricamento schedulazioni per garantire l'estensione del piano di esecuzione
             var trg = TriggerBuilder
                 .Create()
@@ -59,23 +152,11 @@ namespace Taskmanagement.Scheduler.Svcs
                 .Build();
 
             jobDett = new JobDetailImpl(CostantiSched.Quartz.JobNames.System.ScheduleUpdateCheck, JOB_INTERNAL_GROUP, typeof(JobScheduleUpdater));
-            await this.mScheduler.ScheduleJob( jobDett , trg);
+            await this.mScheduler.ScheduleJob(jobDett, trg);
 
-
-            // 3) Il job di check esiti schedulazione
-            //trg = TriggerBuilder
-            //    .Create()
-            //    .WithIdentity(CostantiSched.Quartz.TriggerNames.System.ScheduleResultCheck, TRIGGER_INTERNAL_GROUP)
-            //    .WithSchedule(SimpleScheduleBuilder.RepeatMinutelyForever(AppContextTM.SCHEDULE_RESULT_CHECK_MINUTES))
-            //    //.StartAt(DateTime.Now.ToUniversalTime().AddMinutes(AppContextERD.SCHEDULE_RESULT_CHECK_MINUTES))
-            //    .Build();
-
-            //jobDett = new JobDetailImpl(CostantiSched.Quartz.JobNames.System.ScheduleResultCheck, JOB_INTERNAL_GROUP, typeof(JobScheduleResultChecker));
-            //await this.mScheduler.ScheduleJob(jobDett, trg);
-
-
-            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job avviato");
         }
+
+
 
         async public void Stop()
         {
@@ -84,7 +165,8 @@ namespace Taskmanagement.Scheduler.Svcs
             await this.mScheduler.PauseAll();
             //await this.mScheduler.Clear();
             await this.mScheduler.Shutdown(true);
-
+            //Chiude info nodo
+            this.terminaNodo();
             AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, @"Schedulatore interno job terminato");
         }
 
@@ -151,7 +233,7 @@ namespace Taskmanagement.Scheduler.Svcs
             public TaskSchedulazionePiano Schedulazione;
         }
 
-        async public void ReloadReportSchedules()
+        async public void ReloadSchedules()
         {
             //Mette in pausa tutte le schedulazioni
             await this.mScheduler.Standby();
@@ -165,7 +247,6 @@ namespace Taskmanagement.Scheduler.Svcs
 
                 using (var slot = AppContextTM.Service.CreateSlot())
                 {
-
                     //Carichiamo i trigger == job IN MEMORIA
 
                     foreach (var key in jobkeys)
@@ -193,7 +274,7 @@ namespace Taskmanagement.Scheduler.Svcs
                     {
                         var tBiz = task.ToBizObject<TaskDefinizioneBiz>();
                         //Viene utilizzata la notazione senza secondi NCrontab (Cron.guru)
-                        var schedPlan = tBiz.ReBuildSchedulePlan(dtPlanEnd);
+                        var schedPlan = tBiz.ReBuildSchedulePlan(dtPlanEnd, AppContextTM.SCHEDULE_MASTER_NODE, this.Node_ID);
 
                         foreach (var piano in schedPlan)
                         {

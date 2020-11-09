@@ -36,11 +36,11 @@ namespace TaskManagement.BIZ.src
         /// </summary>
         /// <param name="taskId"></param>
         /// <param name="numOfdays"></param>
-        public void RebuildPlanByTaskId(int taskId, int numOfdays)
+        public void RebuildPlanByTaskId(int taskId, int numOfdays, bool isMaster, int nodoId)
         {
             var tdefBiz = this.Slot.BizNewWithLoadByPK<TaskDefinizioneBiz>(taskId);
 
-            tdefBiz.ReBuildSchedulePlan(DateTime.Now.AddDays(numOfdays));
+            tdefBiz.ReBuildSchedulePlan(DateTime.Now.AddDays(numOfdays), isMaster, nodoId);
         }
 
         /// <summary>

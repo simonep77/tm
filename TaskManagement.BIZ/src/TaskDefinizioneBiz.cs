@@ -430,12 +430,22 @@ namespace TaskManagement.BIZ.src
         }
 
         /// <summary>
-        /// Ricostruisce il piano di schedulazione
+        /// Ricostruisce il piano di schedulazione o restituisce il solo piano di competenza
         /// </summary>
         /// <param name="planDateEnd"></param>
+        /// <param name="isMaster"></param>
+        /// <param name="nodoId"></param>
         /// <returns></returns>
-        public List<TaskSchedulazionePiano> ReBuildSchedulePlan(DateTime planDateEnd)
+        public List<TaskSchedulazionePiano> ReBuildSchedulePlan(DateTime planDateEnd, bool isMaster, int nodoId)
         {
+
+
+            var currPlan = this.Slot.CreateList<TaskSchedulazionePianoLista>()
+                .LoadFullObjects()
+                .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id)
+                .And(Filter.Eq(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato)));
+
+            //Verifichiamo la stringa cron di schedulazione
             if (string.IsNullOrWhiteSpace(this.DataObj.SchedCronString))
                 throw new ArgumentException("Errore ReBuildSchedulePlan - nessuna stringa cron di schedulazione impostata");
 
@@ -447,9 +457,9 @@ namespace TaskManagement.BIZ.src
 
             var dates = cronExpr.GetNextOccurrences(dateStart, planDateEnd);
 
-            var currPlan = this.Slot.CreateList<TaskSchedulazionePianoLista>()
-                .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id)
-                .And(Filter.Eq(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato)));
+            //Se siamo in esecuzione slave ritorniamo solo le schedulazioni di competenza del nodo
+            if (!isMaster)
+                return currPlan.Where(p => p.Task.SchedNodoId == nodoId).ToList();
 
             //Verifico esistenza match piano gia' creato che non verra' modificato
             foreach (var dt in dates)
@@ -492,7 +502,8 @@ namespace TaskManagement.BIZ.src
             //Elimina le schedulazioni future automatiche che non dovranno essere eseguite
             this.Slot.DeleteAll(nextOldPlan);
 
-            return newPlan;
+            //Filtriamo eventuali schedulazioni non a carico di questo nodo master
+            return newPlan.Where(p => p.Task.SchedNodoId == nodoId || p.Task.SchedNodoId == 0).ToList();
         }
      
 
