@@ -12,7 +12,7 @@ MySQL - 8.0.21 : Database - task_management
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`task_management` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/`task_management` /*!40100 DEFAULT CHARACTER SET utf8 */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
 USE `task_management`;
 
@@ -22,26 +22,26 @@ DROP TABLE IF EXISTS `taskdefinizioni`;
 
 CREATE TABLE `taskdefinizioni` (
   `Id` int NOT NULL,
-  `Nome` varchar(100) NOT NULL,
+  `Nome` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `Attivo` tinyint NOT NULL DEFAULT '1',
   `SistemaId` smallint NOT NULL,
   `TipoTaskId` smallint NOT NULL,
-  `AssemblyPath` varchar(300) NOT NULL,
-  `TaskClass` varchar(100) NOT NULL,
-  `LogDir` varchar(250) NOT NULL,
-  `DatiDir` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `AssemblyPath` varchar(300) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `TaskClass` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `LogDir` varchar(250) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `DatiDir` varchar(250) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `MostraConsole` tinyint(1) NOT NULL DEFAULT '1',
   `TipoNotificaId` smallint NOT NULL,
-  `MailFROM` text,
-  `MailTO` text,
-  `MailCC` text,
-  `MailBCC` text,
-  `Riferimento` varchar(100) DEFAULT NULL,
-  `Note` text,
+  `MailFROM` text CHARACTER SET utf8 COLLATE utf8_general_ci,
+  `MailTO` text CHARACTER SET utf8 COLLATE utf8_general_ci,
+  `MailCC` text CHARACTER SET utf8 COLLATE utf8_general_ci,
+  `MailBCC` text CHARACTER SET utf8 COLLATE utf8_general_ci,
+  `Riferimento` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `Note` text CHARACTER SET utf8 COLLATE utf8_general_ci,
   `MantieniNumLogDB` int NOT NULL DEFAULT '60',
   `MantieniNumLogFS` int NOT NULL DEFAULT '60',
   `Eliminato` tinyint(1) NOT NULL DEFAULT '0',
-  `SchedCronString` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SchedCronString` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `SchedNodoId` int DEFAULT NULL COMMENT 'Id del nodo slave che deve eseguire il task schedulato',
   `DataInizio` date NOT NULL DEFAULT '2001-01-01',
   `DataFine` date NOT NULL DEFAULT '9999-12-31',
@@ -55,14 +55,15 @@ CREATE TABLE `taskdefinizioni` (
   CONSTRAINT `taskdefinizioni_ibfk_2` FOREIGN KEY (`TipoNotificaId`) REFERENCES `tasktipinotifiche` (`Id`),
   CONSTRAINT `taskdefinizioni_ibfk_3` FOREIGN KEY (`TipoTaskId`) REFERENCES `tasktipitask` (`Id`),
   CONSTRAINT `taskdefinizioni_ibfk_4` FOREIGN KEY (`SchedNodoId`) REFERENCES `tasknodi` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskdefinizioni` */
 
 insert  into `taskdefinizioni`(`Id`,`Nome`,`Attivo`,`SistemaId`,`TipoTaskId`,`AssemblyPath`,`TaskClass`,`LogDir`,`DatiDir`,`MostraConsole`,`TipoNotificaId`,`MailFROM`,`MailTO`,`MailCC`,`MailBCC`,`Riferimento`,`Note`,`MantieniNumLogDB`,`MantieniNumLogFS`,`Eliminato`,`SchedCronString`,`SchedNodoId`,`DataInizio`,`DataFine`) values 
 (1,'TaskProva',1,1,1,'E:\\applicazioni_data\\task_management\\assembly\\TaskProva\\TaskEsempio.dll','TaskEsempio.TaskProva','E:\\applicazioni_data\\task_management\\log\\TaskProva','E:\\applicazioni_data\\task_management\\dati\\TaskProva',1,1,NULL,NULL,NULL,NULL,'Simone Pelaia',NULL,1,1,0,NULL,NULL,'2001-01-01','9999-12-31'),
 (2,'TaskNetstat',1,1,2,'netstat.exe','-ano','E:\\applicazioni_data\\task_management\\log\\TaskEsterno','E:\\applicazioni_data\\task_management\\dati\\TaskEsterno',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,NULL,'2001-01-01','9999-12-31'),
-(3,'TaskJobProva',1,1,3,'','','E:\\applicazioni_data\\task_management\\log\\TaskJob','E:\\applicazioni_data\\task_management\\dati\\Taskjob',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,NULL,'2001-01-01','9999-12-31');
+(3,'TaskJobProva',1,1,3,'','','E:\\applicazioni_data\\task_management\\log\\TaskJob','E:\\applicazioni_data\\task_management\\dati\\Taskjob',1,1,NULL,NULL,NULL,NULL,'Simone pelaia',NULL,5,5,0,NULL,NULL,'2001-01-01','9999-12-31'),
+
 /*Table structure for table `taskdettaglijob` */
 
 DROP TABLE IF EXISTS `taskdettaglijob`;
@@ -83,7 +84,7 @@ CREATE TABLE `taskdettaglijob` (
   KEY `SubTaskDefId` (`SubTaskDefId`),
   CONSTRAINT `taskdettaglijob_ibfk_1` FOREIGN KEY (`JobTaskDefId`) REFERENCES `taskdefinizioni` (`Id`),
   CONSTRAINT `taskdettaglijob_ibfk_2` FOREIGN KEY (`SubTaskDefId`) REFERENCES `taskdefinizioni` (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskdettaglijob` */
 
@@ -101,12 +102,12 @@ CREATE TABLE `taskesecuzioni` (
   `SchedPianoId` bigint DEFAULT NULL,
   `JobEsecuzioneId` bigint DEFAULT NULL,
   `StatoEsecuzioneId` smallint NOT NULL,
-  `Host` varchar(100) NOT NULL,
-  `Pid` varchar(20) NOT NULL,
+  `Host` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Pid` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `ReturnCode` int NOT NULL DEFAULT '0',
-  `ReturnMessage` text,
+  `ReturnMessage` text CHARACTER SET utf8 COLLATE utf8_general_ci,
   `NotificaCode` int NOT NULL DEFAULT '0',
-  `NotificaMessage` text,
+  `NotificaMessage` text CHARACTER SET utf8 COLLATE utf8_general_ci,
   `DataTermine` datetime DEFAULT NULL,
   `DataInserimento` datetime NOT NULL,
   `DataAggiornamento` datetime NOT NULL,
@@ -117,7 +118,7 @@ CREATE TABLE `taskesecuzioni` (
   CONSTRAINT `taskesecuzioni_ibfk_1` FOREIGN KEY (`TaskDefId`) REFERENCES `taskdefinizioni` (`Id`),
   CONSTRAINT `taskesecuzioni_ibfk_2` FOREIGN KEY (`StatoEsecuzioneId`) REFERENCES `taskstatiesecuzione` (`Id`),
   CONSTRAINT `taskesecuzioni_ibfk_3` FOREIGN KEY (`SchedPianoId`) REFERENCES `taskschedulazioni_piano` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskesecuzioni` */
 
@@ -129,7 +130,7 @@ CREATE TABLE `taskfiles` (
   `Id` bigint NOT NULL AUTO_INCREMENT,
   `TaskEsecuzioneId` bigint NOT NULL,
   `TipoFileId` smallint NOT NULL,
-  `FileName` varchar(150) NOT NULL,
+  `FileName` varchar(150) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `FileData` longblob NOT NULL,
   `DataInserimento` datetime NOT NULL,
   `DataAggiornamento` datetime NOT NULL,
@@ -138,7 +139,7 @@ CREATE TABLE `taskfiles` (
   KEY `TipoFileId` (`TipoFileId`),
   CONSTRAINT `taskfiles_ibfk_1` FOREIGN KEY (`TaskEsecuzioneId`) REFERENCES `taskesecuzioni` (`Id`),
   CONSTRAINT `taskfiles_ibfk_2` FOREIGN KEY (`TipoFileId`) REFERENCES `tasktipifile` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskfiles` */
 
@@ -148,19 +149,20 @@ DROP TABLE IF EXISTS `tasknodi`;
 
 CREATE TABLE `tasknodi` (
   `Id` int NOT NULL AUTO_INCREMENT,
-  `Hostname` varchar(50) NOT NULL,
-  `FQDN` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `Note` text,
+  `Hostname` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `FQDN` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Note` text CHARACTER SET utf8 COLLATE utf8_general_ci,
   `RunIsMaster` tinyint NOT NULL DEFAULT '0',
-  `RunPID` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `RunPID` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `RunStart` datetime DEFAULT NULL,
   `RunEnd` datetime DEFAULT NULL,
   `DataAggiornamento` datetime NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Hostname` (`Hostname`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 /*Data for the table `tasknodi` */
+
 
 /*Table structure for table `taskparametri` */
 
@@ -169,16 +171,15 @@ DROP TABLE IF EXISTS `taskparametri`;
 CREATE TABLE `taskparametri` (
   `TaskDefId` int NOT NULL,
   `IsCondiviso` tinyint NOT NULL DEFAULT '0' COMMENT 'Se 1 indica che trattasi di un riferimento ad un parametro condiviso. Il campo valore verrà pertanto ignorato',
-  `Chiave` varchar(50) NOT NULL,
-  `Valore` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `ValoreOpzionale` text,
+  `Chiave` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Valore` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `ValoreOpzionale` text CHARACTER SET utf8 COLLATE utf8_general_ci,
   `Visibile` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`TaskDefId`,`Chiave`),
   CONSTRAINT `taskparametri_ibfk_1` FOREIGN KEY (`TaskDefId`) REFERENCES `taskdefinizioni` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskparametri` */
-
 
 
 /*Table structure for table `taskparametricondivisi` */
@@ -187,13 +188,13 @@ DROP TABLE IF EXISTS `taskparametricondivisi`;
 
 CREATE TABLE `taskparametricondivisi` (
   `Id` int NOT NULL,
-  `Chiave` varchar(100) NOT NULL COMMENT 'Identificativo univoco',
-  `Valore` text NOT NULL COMMENT 'A seconda del tipo assume il valore di riferimento',
-  `ValoreOpzionale` text COMMENT 'Ulteriore valore a supporto',
-  `Note` text,
+  `Chiave` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'Identificativo univoco',
+  `Valore` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'A seconda del tipo assume il valore di riferimento',
+  `ValoreOpzionale` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT 'Ulteriore valore a supporto',
+  `Note` text CHARACTER SET utf8 COLLATE utf8_general_ci,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Chiave` (`Chiave`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskparametricondivisi` */
 
@@ -208,7 +209,7 @@ CREATE TABLE `taskschedulazioni_piano` (
   `DataEsecuzione` datetime NOT NULL,
   `StatoEsecuzioneId` smallint NOT NULL,
   `IsManuale` tinyint NOT NULL DEFAULT '0',
-  `JsonParametriOverride` text COMMENT 'Json che va a forzare i parametri definiti per il task per questa esecuzione. Es. {"Parametri":[{"Chiave": "param1", "Valore": "valore1"}]}',
+  `JsonParametriOverride` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT 'Json che va a forzare i parametri definiti per il task per questa esecuzione. Es. {"Parametri":[{"Chiave": "param1", "Valore": "valore1"}]}',
   `DataInserimento` datetime NOT NULL,
   `DataAggiornamento` datetime NOT NULL,
   PRIMARY KEY (`Id`),
@@ -216,7 +217,7 @@ CREATE TABLE `taskschedulazioni_piano` (
   KEY `StatoEsecuzioneId` (`StatoEsecuzioneId`),
   CONSTRAINT `taskschedulazioni_piano_ibfk_1` FOREIGN KEY (`TaskDefId`) REFERENCES `taskdefinizioni` (`Id`),
   CONSTRAINT `taskschedulazioni_piano_ibfk_2` FOREIGN KEY (`StatoEsecuzioneId`) REFERENCES `taskstatiesecuzione` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskschedulazioni_piano` */
 
@@ -226,9 +227,9 @@ DROP TABLE IF EXISTS `tasksistemi`;
 
 CREATE TABLE `tasksistemi` (
   `Id` smallint NOT NULL,
-  `Nome` varchar(100) NOT NULL,
+  `Nome` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `tasksistemi` */
 
@@ -241,9 +242,9 @@ DROP TABLE IF EXISTS `taskstatiesecuzione`;
 
 CREATE TABLE `taskstatiesecuzione` (
   `Id` smallint NOT NULL,
-  `Nome` varchar(100) NOT NULL,
+  `Nome` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `taskstatiesecuzione` */
 
@@ -263,9 +264,9 @@ DROP TABLE IF EXISTS `tasktipifile`;
 
 CREATE TABLE `tasktipifile` (
   `Id` smallint NOT NULL,
-  `Nome` varchar(100) NOT NULL,
+  `Nome` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `tasktipifile` */
 
@@ -278,9 +279,9 @@ DROP TABLE IF EXISTS `tasktipinotifiche`;
 
 CREATE TABLE `tasktipinotifiche` (
   `Id` smallint NOT NULL,
-  `Nome` varchar(100) NOT NULL,
+  `Nome` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `tasktipinotifiche` */
 
@@ -294,9 +295,9 @@ DROP TABLE IF EXISTS `tasktipitask`;
 
 CREATE TABLE `tasktipitask` (
   `Id` smallint NOT NULL,
-  `Nome` varchar(100) NOT NULL,
+  `Nome` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `tasktipitask` */
 
