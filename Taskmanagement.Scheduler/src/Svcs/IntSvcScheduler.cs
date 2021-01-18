@@ -270,37 +270,46 @@ namespace Taskmanagement.Scheduler.Svcs
                     //Verifica essistenza ed aggiunge schedulazioni
                     foreach (var task in tasks)
                     {
-                        var tBiz = task.ToBizObject<TaskDefinizioneBiz>();
-                        //Viene utilizzata la notazione senza secondi NCrontab (Cron.guru)
-                        var schedPlan = tBiz.ReBuildSchedulePlan(dtPlanEnd, AppContextTM.SCHEDULE_MASTER_NODE, this.Node_ID);
-
-                        foreach (var piano in schedPlan)
+                        try
                         {
-                            //Crea nome trigger
-                            var trName = this.CalcTrigName(task.Id, piano.DataEsecuzione);
+                            var tBiz = task.ToBizObject<TaskDefinizioneBiz>();
+                            //Viene utilizzata la notazione senza secondi NCrontab (Cron.guru)
+                            var schedPlan = tBiz.ReBuildSchedulePlan(dtPlanEnd, AppContextTM.SCHEDULE_MASTER_NODE, this.Node_ID);
 
-                            TriggerStatus trStatus = null;
+                            foreach (var piano in schedPlan)
+                            {
+                                //Crea nome trigger
+                                var trName = this.CalcTrigName(task.Id, piano.DataEsecuzione);
 
-                            //Verifica esistenza: se non esiste lo crea, se esiste lo rimuove da elenco
-                            if (!trigDiz.TryGetValue(trName, out trStatus))
-                            {
-                                //Crea trigger
-                                var trg = TriggerBuilder.Create().StartAt(piano.DataEsecuzione.ToUniversalTime()).WithIdentity(trName, TRIGGER_TASKS_GROUP).Build();
-                                
-                                //Crea job
-                                var jobDet = new JobDetailImpl(this.CalcJobName(piano.TaskDefId, piano.DataEsecuzione), JOB_TASKS_GROUP, typeof(JobTaskRun));
-                                jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.SchedPianoId, piano.Id);
-                                jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskDeftId, task.Id);
-                                jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskName, task.Nome);
-                                //Schedula
-                                await this.mScheduler.ScheduleJob(jobDet, trg);
-                            }
-                            else
-                            {
-                                //Rimuove da elenco in quanto esistente dei trigger in memoria
-                                trigDiz.Remove(trName);
+                                TriggerStatus trStatus = null;
+
+                                //Verifica esistenza: se non esiste lo crea, se esiste lo rimuove da elenco
+                                if (!trigDiz.TryGetValue(trName, out trStatus))
+                                {
+                                    //Crea trigger
+                                    var trg = TriggerBuilder.Create().StartAt(piano.DataEsecuzione.ToUniversalTime()).WithIdentity(trName, TRIGGER_TASKS_GROUP).Build();
+
+                                    //Crea job
+                                    var jobDet = new JobDetailImpl(this.CalcJobName(piano.TaskDefId, piano.DataEsecuzione), JOB_TASKS_GROUP, typeof(JobTaskRun));
+                                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.SchedPianoId, piano.Id);
+                                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskDeftId, task.Id);
+                                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskName, task.Nome);
+                                    //Schedula
+                                    await this.mScheduler.ScheduleJob(jobDet, trg);
+                                }
+                                else
+                                {
+                                    //Rimuove da elenco in quanto esistente dei trigger in memoria
+                                    trigDiz.Remove(trName);
+                                }
                             }
                         }
+                        catch (Exception e)
+                        {
+                            AppContextTM.Service.WriteLog(EventLogEntryType.Error, $"Errore nella schedulazione del task: {task.Nome}");
+                            AppContextTM.Service.SendMailError($"Errore nella schedulazione del task: {task.Nome}<br>{e.Message}<br><br>{e.StackTrace}");
+                        }
+
                     }
 
                     //Rimuove i job non piu' esistenti/coerenti
@@ -319,6 +328,11 @@ namespace Taskmanagement.Scheduler.Svcs
 
                 this.printSchedules();
 
+            }
+            catch (Exception e)
+            {
+                AppContextTM.Service.WriteLog(EventLogEntryType.Error, $"Errore nell'aggiornamento del piano di schedulazione");
+                AppContextTM.Service.SendMailError($"Errore nell'aggiornamento del piano di schedulazione: <br>{e.Message}<br><br>{e.StackTrace}");
             }
             finally
             {

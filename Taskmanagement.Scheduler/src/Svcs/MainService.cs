@@ -1,5 +1,5 @@
 ﻿using Bdo.Objects;
-
+using Bdo.Utils;
 using LevelB.Vici.WinService.Service;
 using LevelB.Vici.WinService.Tasks;
 using System;
@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Taskmanagement.Scheduler.Common;
+using Taskmanagement.Scheduler.Properties;
 using TaskManagement.DAL;
 
 namespace Taskmanagement.Scheduler.Svcs
@@ -165,6 +166,29 @@ namespace Taskmanagement.Scheduler.Svcs
                 Console.WriteLine(logMessage);
             }
 
+        }
+
+
+        /// <summary>
+        /// Invia una mail di errore
+        /// </summary>
+        /// <param name="body"></param>
+        public void SendMailError(string body)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(Settings.Default.NotificaErroriApplicazioneTO))
+                {
+                    var subj = $"ERR - {AppContextTM.SERVICE_NAME}";
+                    var bodyH = $"Si è verificato il seguente errore:<br/>" + body;
+                    var ml = new Mailer();
+                    ml.Send(null, Settings.Default.NotificaErroriApplicazioneTO, Settings.Default.NotificaErroriApplicazioneCC, null, subj, body, null, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.WriteLog(EventLogEntryType.Error, $"Errore nell'invio email di notifica errore: {ex.Message}");
+            }
         }
 
 

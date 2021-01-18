@@ -2,12 +2,9 @@
 using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using TaskManagement.Common;
 using TaskManagement.DAL;
@@ -451,7 +448,7 @@ namespace TaskManagement.BIZ.src
 
             var newPlan = new List<TaskSchedulazionePiano>();
 
-            var cronExpr = NCrontab.CrontabSchedule.Parse(this.DataObj.SchedCronString);
+            var cronExpr = NCrontab.Advanced.CrontabSchedule.Parse(this.DataObj.SchedCronString);
 
             var dateStart = DateTime.Now;
 
