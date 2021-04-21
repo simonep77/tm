@@ -27,8 +27,7 @@ namespace EasyReportDispatcher_SCHEDULER.src.Jobs
                     var taskName = context.JobDetail.JobDataMap[CostantiSched.JobDataMap.Task.TaskName].ToString();
 
                     //Avvia esecuzione ed attende fine
-                    var p = Process.Start(AppContextTM.TASKWORKER_EXE, planId.ToString());
-                    p.WaitForExit();
+                    AppContextTM.Service.TaskRunByPlanId(planId, true);
 
                     //Riporta primo output
                     //marca piano come in esecuzione

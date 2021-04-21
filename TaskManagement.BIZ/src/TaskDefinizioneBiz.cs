@@ -413,7 +413,7 @@ namespace TaskManagement.BIZ.src
                 //Esegue pulizia log su File System
                 this.esecuzionePuliziaFileFS();
             }
-            catch (Exception)
+            catch (Exception e)
             {
 
                 throw;
@@ -425,6 +425,20 @@ namespace TaskManagement.BIZ.src
             }
 
         }
+
+
+        public TaskSchedulazionePiano CreaSchedulazione(DateTime dtWhen, bool manuale, bool alreadyRunning)
+        {
+            var plNew = this.Slot.CreateObject<TaskSchedulazionePiano>();
+            plNew.TaskDefId = this.DataObj.Id;
+            plNew.DataEsecuzione = dtWhen;
+            plNew.IsManuale = Convert.ToSByte(manuale ? 1 : 0);
+            plNew.StatoEsecuzioneId = (short)(alreadyRunning ? EStatoEsecuzione.PS_InEsecuzione : EStatoEsecuzione.PS_Pianificato);
+            this.Slot.SaveObject(plNew);
+
+            return plNew;
+        }
+
 
         /// <summary>
         /// Ricostruisce il piano di schedulazione o restituisce il solo piano di competenza
@@ -472,12 +486,10 @@ namespace TaskManagement.BIZ.src
                     currPlan.Remove(plExist);
                     continue;
                 }
+
                 //Crea nuova schedulazione
-                var plNew = this.Slot.CreateObject<TaskSchedulazionePiano>();
-                plNew.TaskDefId = this.DataObj.Id;
-                plNew.DataEsecuzione = dt;
-                plNew.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_Pianificato;
-                this.Slot.SaveObject(plNew);
+                var plNew = this.CreaSchedulazione(dt, false, false);
+
                 newPlan.Add(plNew);
 
             }

@@ -14,5 +14,8 @@
     <Setting Name="MasterNode" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="ApiBindingAddress" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://+:8080</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -2,6 +2,7 @@
 using Bdo.Utils;
 using LevelB.Vici.WinService.Service;
 using LevelB.Vici.WinService.Tasks;
+using Microsoft.Owin.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Taskmanagement.Scheduler.Common;
 using Taskmanagement.Scheduler.Properties;
+using Taskmanagement.Scheduler.src.Api;
 using TaskManagement.DAL;
 
 namespace Taskmanagement.Scheduler.Svcs
@@ -22,6 +24,7 @@ namespace Taskmanagement.Scheduler.Svcs
         public int RunMode { get; set; }
 
         public IntSvcScheduler InternalScheduler { get; } = new IntSvcScheduler();
+        protected IDisposable InternalApiWebApp { get; set; }
 
         public MainService(): base(@"TM-Scheduler")
         {
@@ -44,6 +47,9 @@ namespace Taskmanagement.Scheduler.Svcs
             this.initEventLog();
 
             this.InternalScheduler.Start();
+
+            this.startWebApi();
+
         }
 
         protected override void OnStateChanged(ServiceTask serviceTask, ServiceState serviceState)
@@ -61,6 +67,8 @@ namespace Taskmanagement.Scheduler.Svcs
             base.OnStopping();
 
             this.InternalScheduler.Stop();
+
+            this.stopWebApi();
 
             if (this.mMutex != null)
                 this.mMutex.Dispose();
@@ -191,8 +199,69 @@ namespace Taskmanagement.Scheduler.Svcs
             }
         }
 
+        /// <summary>
+        /// Esegue task dal nome
+        /// </summary>
+        /// <param name="taskName"></param>
+        /// <param name="waitEnd"></param>
+        public void TaskRunByName(string taskName, bool waitEnd)
+        {
+            //Avvia esecuzione ed attende fine
+            var p = Process.Start(AppContextTM.TASKWORKER_EXE, taskName);
+
+            if (waitEnd)
+                p.WaitForExit();
+        }
+
+        /// <summary>
+        /// Esegue task da piano di schedulazione
+        /// </summary>
+        /// <param name="planId"></param>
+        /// <param name="waitEnd"></param>
+        public void TaskRunByPlanId(long planId, bool waitEnd)
+        {
+            //Avvia esecuzione ed attende fine
+            var p = Process.Start(AppContextTM.TASKWORKER_EXE, planId.ToString());
+
+            if (waitEnd)
+                p.WaitForExit();
+        }
+
 
         #region PRIVATE
+
+        private void startWebApi()
+        {
+            try
+            {
+                //string baseAddress = "http://localhost:9000/";
+                this.InternalApiWebApp = WebApp.Start<StartupApi>(AppContextTM.API_BINDING_ADDRESS);
+                this.WriteLog(EventLogEntryType.Information, $"Web Api avviate su: {AppContextTM.API_BINDING_ADDRESS}");
+            }
+            catch (Exception e)
+            {
+                while (e != null)
+                {
+                    this.WriteLog(EventLogEntryType.Error, $"Errore nell'attivazione delle Web Api: {e.Message}");
+                    e = e.InnerException;
+                }
+
+                //Istruzioni
+                this.WriteLog(EventLogEntryType.Warning, "Istruzioni in caso di errore da 'accesso negato':");
+                this.WriteLog(EventLogEntryType.Warning, " - Eseguire come amministratore il seguente comando:");
+                this.WriteLog(EventLogEntryType.Warning, $"   netsh http add urlacl url={AppContextTM.API_BINDING_ADDRESS.Replace('+','*')} user=Everyone listen = yes");
+
+                //netsh http add urlacl url=http://example.com:8080/ user=Everyone listen = yes
+
+                this.SendMailError($"Errore nell'attivazione delle Web Api: {e.Message}");
+            }
+        }
+
+        private void stopWebApi()
+        {
+            this.InternalApiWebApp?.Dispose();
+        }
+
 
         /// <summary>
         /// Crea mutex per esecuzione a singola istanza
