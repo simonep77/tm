@@ -14,9 +14,19 @@ namespace TaskManagement.Interface
         private ILogger mLogger;
         public ITaskRunTimeInfo Runtime { get; } = new TaskRuntimeInfo();
 
+        protected string CurrentStep { get; private set; } = string.Empty;
+        protected virtual string[] ParametriAttesi { get; set; }
 
+        protected virtual bool CheckUserParams()
+        {
+            //Se impostati i parametri attesi allora li verifica, altrimenti torna true
+            if (this.ParametriAttesi != null)
+                return this.ParametriAttesi.All(p => this.Runtime.UserParams.ContainsKey(p));
 
-        protected abstract bool CheckUserParams();
+            //Necessario eseguire il check se previsto almeno un parametro
+            return (this.Runtime.UserParams.Count == 0);
+        }
+
         protected abstract int TaskExecute();
 
         public void Dispose()
@@ -178,6 +188,14 @@ namespace TaskManagement.Interface
         {
             this.mLogger.WriteLog(messageFmt, args);
         }
+
+
+        protected void AvvioStep(string step)
+        {
+            this.CurrentStep = step;
+            this.mLogger.WriteLog($"Avvio {step}");
+        }
+
 
         /// <summary>
         /// Segnala al sistema che si e' verificata una condizione da gestire (forse)

@@ -23,7 +23,9 @@ namespace Taskmanagement.Scheduler
         public static readonly int SCHEDULE_RESULT_CHECK_MINUTES = 10;
         public static readonly int SCHEDULE_EXECUTION_PLAN_DAYS = 2;
         public static readonly bool SCHEDULE_MASTER_NODE = Settings.Default.MasterNode;
+        public static readonly bool API_ENABLED = Settings.Default.ApiEnabled;
         public static readonly string API_BINDING_ADDRESS = Settings.Default.ApiBindingAddress;
+        public static readonly string[] API_KEYS = Settings.Default.ApiKeys.Replace(" ","").Split(new char[] { ',',';' }, StringSplitOptions.RemoveEmptyEntries);
 
         public static readonly string TASKWORKER_EXE = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"TaskManagement.Worker.exe");
 

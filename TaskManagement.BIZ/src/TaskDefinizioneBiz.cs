@@ -1,5 +1,7 @@
 ﻿using Bdo.Objects;
 using ICSharpCode.SharpZipLib.Zip;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -103,10 +105,10 @@ namespace TaskManagement.BIZ.src
 
             if (this.DataObj.TipoNotificaId == (int)ETipoNotificaEsito.Email)
             {
-                task.Runtime.SysMailFROM = this.DataObj.TaskClass;
-                task.Runtime.SysMailTO = this.DataObj.TaskClass;
-                task.Runtime.SysMailCC = this.DataObj.TaskClass;
-                task.Runtime.SysMailBCC = this.DataObj.TaskClass;
+                task.Runtime.SysMailFROM = this.DataObj.MailFROM;
+                task.Runtime.SysMailTO = this.DataObj.MailTO;
+                task.Runtime.SysMailCC = this.DataObj.MailCC;
+                task.Runtime.SysMailBCC = this.DataObj.MailBCC;
             }
 
             //Parametri validi solo su tipo task class
@@ -145,6 +147,28 @@ namespace TaskManagement.BIZ.src
                     }
                     task.Runtime.UserParams.Add(item.Chiave, rtParam);
                 }
+
+                //Qui in caso di esecuzione pianificata potrebbero essere passati parametri di override
+                if (this.IsRunningUnderSchedule)
+                {
+                    if (!string.IsNullOrWhiteSpace(this.mPianoSched.JsonParametriOverride))
+                    {
+                        //TDO da implementare
+                        var obj = JsonConvert.DeserializeObject(this.mPianoSched.JsonParametriOverride) as JObject;
+                       
+                        foreach (var item in obj)
+                        {
+                            //Imposta di base i parametri specifici
+                            var rtParam = new Interface.TaskRuntimeParametro();
+                            rtParam.Chiave = item.Key;
+                            rtParam.IsVisibile = true;
+                            rtParam.Valore = item.Value.ToString();
+                            task.Runtime.UserParams.Add(rtParam.Chiave, rtParam);
+                        }
+
+                    }
+                }
+
             }
 
 
@@ -427,13 +451,14 @@ namespace TaskManagement.BIZ.src
         }
 
 
-        public TaskSchedulazionePiano CreaSchedulazione(DateTime dtWhen, bool manuale, bool alreadyRunning)
+        public TaskSchedulazionePiano CreaSchedulazione(DateTime dtWhen, bool manuale, bool alreadyRunning, string jsonParametri = null)
         {
             var plNew = this.Slot.CreateObject<TaskSchedulazionePiano>();
             plNew.TaskDefId = this.DataObj.Id;
             plNew.DataEsecuzione = dtWhen;
             plNew.IsManuale = Convert.ToSByte(manuale ? 1 : 0);
             plNew.StatoEsecuzioneId = (short)(alreadyRunning ? EStatoEsecuzione.PS_InEsecuzione : EStatoEsecuzione.PS_Pianificato);
+            plNew.JsonParametriOverride = jsonParametri;
             this.Slot.SaveObject(plNew);
 
             return plNew;
@@ -450,48 +475,53 @@ namespace TaskManagement.BIZ.src
         public List<TaskSchedulazionePiano> ReBuildSchedulePlan(DateTime planDateEnd, bool isMaster, int nodoId)
         {
 
-
             var currPlan = this.Slot.CreateList<TaskSchedulazionePianoLista>()
                 .LoadFullObjects()
                 .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id)
                 .And(Filter.Eq(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato)));
 
-            //Verifichiamo la stringa cron di schedulazione
-            if (string.IsNullOrWhiteSpace(this.DataObj.SchedCronString))
-                throw new ArgumentException("Errore ReBuildSchedulePlan - nessuna stringa cron di schedulazione impostata");
+            var dateStart = DateTime.Now;
 
             var newPlan = new List<TaskSchedulazionePiano>();
 
-            var cronExpr = NCrontab.Advanced.CrontabSchedule.Parse(this.DataObj.SchedCronString);
-
-            var dateStart = DateTime.Now;
-
-            var dates = cronExpr.GetNextOccurrences(dateStart, planDateEnd);
-
-            //Se siamo in esecuzione slave ritorniamo solo le schedulazioni di competenza del nodo
-            if (!isMaster)
-                return currPlan.Where(p => p.Task.SchedNodoId == nodoId).ToList();
-
-            //Verifico esistenza match piano gia' creato che non verra' modificato
-            foreach (var dt in dates)
+            //Verifichiamo la stringa cron di schedulazione e controlliamo le schedulazioni esistenti
+            if (!string.IsNullOrWhiteSpace(this.DataObj.SchedCronString))
             {
-                //Cerca schedulazione
-                var sched = currPlan.Where(d => d.DataEsecuzione == dt);
+                var cronExpr = NCrontab.Advanced.CrontabSchedule.Parse(this.DataObj.SchedCronString);
 
-                if (sched.Any())
+
+                var dates = cronExpr.GetNextOccurrences(dateStart, planDateEnd);
+
+                //Se siamo in esecuzione slave ritorniamo solo le schedulazioni di competenza del nodo
+                if (!isMaster)
+                    return currPlan.Where(p => p.Task.SchedNodoId == nodoId).ToList();
+
+                //Verifico esistenza match piano gia' creato che non verra' modificato
+                foreach (var dt in dates)
                 {
-                    //Rimuove da elenco
-                    var plExist = sched.First();
-                    newPlan.Add(plExist);
-                    currPlan.Remove(plExist);
-                    continue;
+                    //Cerca schedulazione
+                    var sched = currPlan.Where(d => d.DataEsecuzione == dt);
+
+                    if (sched.Any())
+                    {
+                        //Rimuove da elenco
+                        var plExist = sched.First();
+                        newPlan.Add(plExist);
+                        currPlan.Remove(plExist);
+                        continue;
+                    }
+
+                    //Crea nuova schedulazione
+                    var plNew = this.CreaSchedulazione(dt, false, false);
+
+                    newPlan.Add(plNew);
                 }
-
-                //Crea nuova schedulazione
-                var plNew = this.CreaSchedulazione(dt, false, false);
-
-                newPlan.Add(plNew);
-
+            }
+            else
+            {
+                //Ritorna un piano vuoto
+                if (currPlan.Count == 0)
+                    return newPlan;
             }
 
             //Marca come saltate le schedulazioni passate non avviate (sia manuali che automatiche)
@@ -500,7 +530,6 @@ namespace TaskManagement.BIZ.src
             var nextManPlan = currPlan.FindAllByPropertyFilter(Filter.Gte(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 1)));
             //Individua le future non piu' schedulate
             var nextOldPlan = currPlan.FindAllByPropertyFilter(Filter.Gte(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 0)));
-
             //Aggiunge le manuali future alle automatiche rivalutate
             newPlan.AddRange(nextManPlan);
 

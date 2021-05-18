@@ -232,6 +232,14 @@ namespace Taskmanagement.Scheduler.Svcs
 
         private void startWebApi()
         {
+            if (AppContextTM.API_ENABLED)
+                this.WriteLog(EventLogEntryType.Information, "Avvio WebApi...");
+            else
+            {
+                this.WriteLog(EventLogEntryType.Information, "WebApi non abilitate");
+                return;
+            }
+
             try
             {
                 //string baseAddress = "http://localhost:9000/";
@@ -259,6 +267,9 @@ namespace Taskmanagement.Scheduler.Svcs
 
         private void stopWebApi()
         {
+            if (AppContextTM.API_ENABLED)
+                this.WriteLog(EventLogEntryType.Information, "Stop WebApi...");
+
             this.InternalApiWebApp?.Dispose();
         }
 

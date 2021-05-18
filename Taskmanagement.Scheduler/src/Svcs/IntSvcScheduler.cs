@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using Taskmanagement.Scheduler.Common;
 using TaskManagement.BIZ.src;
+using TaskManagement.Common;
 using TaskManagement.DAL;
 
 namespace Taskmanagement.Scheduler.Svcs
@@ -225,11 +226,151 @@ namespace Taskmanagement.Scheduler.Svcs
 
 
 
-        private class TriggerStatus
-        {
-            public ITrigger Trigger;
-            public TaskSchedulazionePiano Schedulazione;
-        }
+        //private class TriggerStatus
+        //{
+        //    public ITrigger Trigger;
+        //    public TaskSchedulazionePiano Schedulazione;
+        //}
+
+        //async public void ReloadSchedulesOld()
+        //{
+        //    //Mette in pausa tutte le schedulazioni
+        //    await this.mScheduler.Standby();
+        //    try
+        //    {
+
+
+        //        var matcher = GroupMatcher<JobKey>.GroupContains(JOB_TASKS_GROUP);
+        //        var jobkeys = await this.mScheduler.GetJobKeys(matcher);
+        //        var trigDiz = new Dictionary<string, TriggerStatus>();
+
+        //        using (var slot = AppContextTM.Service.CreateSlot())
+        //        {
+        //            //Carichiamo i trigger == job IN MEMORIA
+
+        //            foreach (var key in jobkeys)
+        //            {
+        //                foreach (var trg in await this.mScheduler.GetTriggersOfJob(key))
+        //                {
+        //                    trigDiz.Add(trg.Key.Name, new TriggerStatus() { Trigger=trg });
+        //                }
+        //            }
+                    
+
+        //            var tasks = slot.CreateList<TaskDefinizioneLista>()
+        //                .LoadFullObjects()
+        //                .SearchByColumn(Filter.Eq(nameof(TaskDefinizione.Attivo), 1)
+        //                .And(Filter.NotNull(nameof(TaskDefinizione.SchedCronString)).Or(Filter.Neq(nameof(TaskDefinizione.SchedCronString), string.Empty)))
+        //                .And(Filter.Lte(nameof(TaskDefinizione.DataInizio), DateTime.Today)
+        //                .And(Filter.Gte(nameof(TaskDefinizione.DataFine), DateTime.Today))));
+
+        //            var dtPlanStart = DateTime.Now;
+        //            var dtPlanEnd = dtPlanStart.AddDays(AppContextTM.SCHEDULE_EXECUTION_PLAN_DAYS);
+
+        //            //Verifica essistenza ed aggiunge schedulazioni
+        //            foreach (var task in tasks)
+        //            {
+        //                try
+        //                {
+        //                    var tBiz = task.ToBizObject<TaskDefinizioneBiz>();
+        //                    //Viene utilizzata la notazione senza secondi NCrontab (Cron.guru)
+        //                    var schedPlan = tBiz.ReBuildSchedulePlan(dtPlanEnd, AppContextTM.SCHEDULE_MASTER_NODE, this.Node_ID);
+
+        //                    foreach (var piano in schedPlan)
+        //                    {
+        //                        //Crea nome trigger
+        //                        var trName = this.CalcTrigName(task.Id, piano.DataEsecuzione);
+
+        //                        TriggerStatus trStatus = null;
+
+        //                        //Verifica esistenza: se non esiste lo crea, se esiste lo rimuove da elenco
+        //                        if (!trigDiz.TryGetValue(trName, out trStatus))
+        //                        {
+        //                            //Crea trigger
+        //                            var trg = TriggerBuilder.Create().StartAt(piano.DataEsecuzione.ToUniversalTime()).WithIdentity(trName, TRIGGER_TASKS_GROUP).Build();
+
+        //                            //Crea job
+        //                            var jobDet = new JobDetailImpl(this.CalcJobName(piano.TaskDefId, piano.DataEsecuzione), JOB_TASKS_GROUP, typeof(JobTaskRun));
+        //                            jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.SchedPianoId, piano.Id);
+        //                            jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskDeftId, task.Id);
+        //                            jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskName, task.Nome);
+        //                            //Schedula
+        //                            await this.mScheduler.ScheduleJob(jobDet, trg);
+        //                        }
+        //                        else
+        //                        {
+        //                            //Rimuove da elenco in quanto esistente dei trigger in memoria
+        //                            trigDiz.Remove(trName);
+        //                        }
+        //                    }
+        //                }
+        //                catch (Exception e)
+        //                {
+        //                    AppContextTM.Service.WriteLog(EventLogEntryType.Error, $"Errore nella schedulazione del task: {task.Nome}");
+        //                    AppContextTM.Service.SendMailError($"Errore nella schedulazione del task: {task.Nome}<br>{e.Message}<br><br>{e.StackTrace}");
+        //                }
+
+        //            }
+
+        //            //Gestisce le schedulazioni manuali
+        //            var schedmanuali = slot.CreateList<TaskSchedulazionePianoLista>()
+        //                                    .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato)
+        //                                                    .And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 1)));
+
+        //            foreach (var sched in schedmanuali)
+        //            {
+        //                //Crea nome trigger
+        //                var trName = this.CalcTrigName(sched.TaskDefId, sched.DataEsecuzione);
+
+        //                if (trigDiz.ContainsKey(trName))
+        //                    trigDiz.Remove(trName);
+        //                else
+        //                {
+        //                    //Va schedulata!!!!
+        //                    //Crea trigger
+        //                    var trg = TriggerBuilder.Create().StartAt(sched.DataEsecuzione.ToUniversalTime()).WithIdentity(trName, TRIGGER_TASKS_GROUP).Build();
+
+        //                    //Crea job
+        //                    var jobDet = new JobDetailImpl(this.CalcJobName(sched.TaskDefId, sched.DataEsecuzione), JOB_TASKS_GROUP, typeof(JobTaskRun));
+        //                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.SchedPianoId, sched.Id);
+        //                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskDeftId, sched.Task.Id);
+        //                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskName, sched.Task.Nome);
+        //                    //Schedula
+        //                    await this.mScheduler.ScheduleJob(jobDet, trg);
+        //                }
+        //            }
+
+        //            //Rimuove i job non piu' esistenti/coerenti
+        //            foreach (var item in trigDiz)
+        //            {
+        //                //if (item.Value.Schedulazione.ObjectState == EObjectState.Loaded)
+        //                //    slot.DeleteObject(item.Value.Schedulazione);
+
+        //                await this.mScheduler.DeleteJob(item.Value.Trigger.JobKey);
+        //            }
+
+
+        //            trigDiz.Clear();
+
+        //        }
+
+        //        this.printSchedules();
+
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        AppContextTM.Service.WriteLog(EventLogEntryType.Error, $"Errore nell'aggiornamento del piano di schedulazione");
+        //        AppContextTM.Service.SendMailError($"Errore nell'aggiornamento del piano di schedulazione: <br>{e.Message}<br><br>{e.StackTrace}");
+        //    }
+        //    finally
+        //    {
+        //        //Riavvia tutte le schedulazioni
+        //        await this.mScheduler.Start();
+        //    }
+
+        //}
+
+
 
         async public void ReloadSchedules()
         {
@@ -237,30 +378,14 @@ namespace Taskmanagement.Scheduler.Svcs
             await this.mScheduler.Standby();
             try
             {
-
-
-                var matcher = GroupMatcher<JobKey>.GroupContains(JOB_TASKS_GROUP);
-                var jobkeys = await this.mScheduler.GetJobKeys(matcher);
-                var trigDiz = new Dictionary<string, TriggerStatus>();
+                await this.mScheduler.Clear();
 
                 using (var slot = AppContextTM.Service.CreateSlot())
                 {
-                    //Carichiamo i trigger == job IN MEMORIA
-
-                    foreach (var key in jobkeys)
-                    {
-                        foreach (var trg in await this.mScheduler.GetTriggersOfJob(key))
-                        {
-                            trigDiz.Add(trg.Key.Name, new TriggerStatus() { Trigger=trg });
-                        }
-                    }
-                    
-
 
                     var tasks = slot.CreateList<TaskDefinizioneLista>()
                         .LoadFullObjects()
                         .SearchByColumn(Filter.Eq(nameof(TaskDefinizione.Attivo), 1)
-                        .And(Filter.NotNull(nameof(TaskDefinizione.SchedCronString)).Or(Filter.Neq(nameof(TaskDefinizione.SchedCronString), string.Empty)))
                         .And(Filter.Lte(nameof(TaskDefinizione.DataInizio), DateTime.Today)
                         .And(Filter.Gte(nameof(TaskDefinizione.DataFine), DateTime.Today))));
 
@@ -281,27 +406,18 @@ namespace Taskmanagement.Scheduler.Svcs
                                 //Crea nome trigger
                                 var trName = this.CalcTrigName(task.Id, piano.DataEsecuzione);
 
-                                TriggerStatus trStatus = null;
+                                //Crea trigger
+                                var trg = TriggerBuilder.Create().StartAt(piano.DataEsecuzione.ToUniversalTime()).WithIdentity(trName, TRIGGER_TASKS_GROUP).Build();
 
-                                //Verifica esistenza: se non esiste lo crea, se esiste lo rimuove da elenco
-                                if (!trigDiz.TryGetValue(trName, out trStatus))
-                                {
-                                    //Crea trigger
-                                    var trg = TriggerBuilder.Create().StartAt(piano.DataEsecuzione.ToUniversalTime()).WithIdentity(trName, TRIGGER_TASKS_GROUP).Build();
+                                //Crea job
+                                var jobDet = new JobDetailImpl(this.CalcJobName(piano.TaskDefId, piano.DataEsecuzione), JOB_TASKS_GROUP, typeof(JobTaskRun));
+                                jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.SchedPianoId, piano.Id);
+                                jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskDeftId, task.Id);
+                                jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskName, task.Nome);
+                                
+                                //Schedula
+                                await this.mScheduler.ScheduleJob(jobDet, trg);
 
-                                    //Crea job
-                                    var jobDet = new JobDetailImpl(this.CalcJobName(piano.TaskDefId, piano.DataEsecuzione), JOB_TASKS_GROUP, typeof(JobTaskRun));
-                                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.SchedPianoId, piano.Id);
-                                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskDeftId, task.Id);
-                                    jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskName, task.Nome);
-                                    //Schedula
-                                    await this.mScheduler.ScheduleJob(jobDet, trg);
-                                }
-                                else
-                                {
-                                    //Rimuove da elenco in quanto esistente dei trigger in memoria
-                                    trigDiz.Remove(trName);
-                                }
                             }
                         }
                         catch (Exception e)
@@ -311,18 +427,6 @@ namespace Taskmanagement.Scheduler.Svcs
                         }
 
                     }
-
-                    //Rimuove i job non piu' esistenti/coerenti
-                    foreach (var item in trigDiz)
-                    {
-                        //if (item.Value.Schedulazione.ObjectState == EObjectState.Loaded)
-                        //    slot.DeleteObject(item.Value.Schedulazione);
-
-                        await this.mScheduler.DeleteJob(item.Value.Trigger.JobKey);
-                    }
-
-
-                    trigDiz.Clear();
 
                 }
 
@@ -339,7 +443,9 @@ namespace Taskmanagement.Scheduler.Svcs
                 //Riavvia tutte le schedulazioni
                 await this.mScheduler.Start();
             }
-
         }
+
+
+
     }
 }

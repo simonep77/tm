@@ -67,5 +67,23 @@ namespace Taskmanagement.Scheduler.Properties {
                 return ((string)(this["ApiBindingAddress"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ApiEnabled {
+            get {
+                return ((bool)(this["ApiEnabled"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ApiKeys {
+            get {
+                return ((string)(this["ApiKeys"]));
+            }
+        }
     }
 }
