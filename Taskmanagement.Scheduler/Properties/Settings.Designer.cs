@@ -61,7 +61,7 @@ namespace Taskmanagement.Scheduler.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://+:8080")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://+:8080/")]
         public string ApiBindingAddress {
             get {
                 return ((string)(this["ApiBindingAddress"]));

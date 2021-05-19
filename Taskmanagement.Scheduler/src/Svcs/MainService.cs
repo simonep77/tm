@@ -257,7 +257,7 @@ namespace Taskmanagement.Scheduler.Svcs
                 //Istruzioni
                 this.WriteLog(EventLogEntryType.Warning, "Istruzioni in caso di errore da 'accesso negato':");
                 this.WriteLog(EventLogEntryType.Warning, " - Eseguire come amministratore il seguente comando:");
-                this.WriteLog(EventLogEntryType.Warning, $"   netsh http add urlacl url={AppContextTM.API_BINDING_ADDRESS.Replace('+','*')} user=Everyone listen = yes");
+                this.WriteLog(EventLogEntryType.Warning, $"   netsh http add urlacl url={AppContextTM.API_BINDING_ADDRESS} user=Everyone listen = yes");
 
                 //netsh http add urlacl url=http://example.com:8080/ user=Everyone listen = yes
 
