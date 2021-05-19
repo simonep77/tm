@@ -106,7 +106,7 @@ namespace Taskmanagement.Scheduler.src.Api
 
         [HttpPost]
         [HttpGet]
-        [Route(@"api/task/{taskName}/run")]
+        [Route(@"api/task/{taskName}/run/{when?}")]
         public object TaskSchedule(string taskName, string when = null)
         {
             AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"API Call -> run {taskName} {when}");
@@ -154,7 +154,19 @@ namespace Taskmanagement.Scheduler.src.Api
                 }
                 else
                 {
-                    var dtWhen = DateTime.ParseExact(when, "yyyyMMddHHmm", CultureInfo.CurrentCulture);
+                    DateTime dtWhen;
+                    try
+                    {
+                        dtWhen = DateTime.ParseExact(when, "yyyyMMddHHmm", CultureInfo.CurrentCulture);
+                    }
+                    catch (Exception)
+                    {
+                        throw new ArgumentException($"Se fornita la data di schedulazione questa deve essere nel formato yyyyMMddHHmm");
+                    }
+
+                    if (dtWhen <= DateTime.Now)
+                        throw new ArgumentException($"La data di schedulazione deve essere maggiore dell'ora corrente. Fornita {when}, corrente {DateTime.Now:yyyyMMddHHmm}. Se si vuole eseguire immediatamente rimuovere il parametro data.");
+
                     tSched = tBiz.CreaSchedulazione(dtWhen, true, false, postParamsJson);
                     AppContextTM.Service.InternalScheduler.ReloadSchedules();
                 }
