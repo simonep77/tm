@@ -243,7 +243,7 @@ namespace TaskManagement.BIZ.src
                     {
                         //Scrive output esito vari subtask
                         sbBody.Append($"<li> N. {item.DettJob.Progressivo} - {item.DettJob.SubTask.Id} {item.DettJob.SubTask.Nome}");
-                        sbBody.Append($"<br/>Eseguito: {item.Eseguito} - Esito: {item.Esito.ReturnCode} {item.Esito.ReturnMessage}</li>");
+                        sbBody.Append($"<br/>Eseguito: {item.Eseguito} - Esito: {item.Esito?.ReturnCode} {item.Esito?.ReturnMessage}</li>");
 
                         if (!item.Eseguito)
                             continue;

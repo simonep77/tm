@@ -212,5 +212,54 @@ namespace Taskmanagement.Scheduler.src.Api
         }
 
 
+        [HttpGet]
+        [Route(@"api/task/{planId}/log")]
+        public IHttpActionResult TaskLog(long planId)
+        {
+            AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"Begin API Call -> log {planId}");
+            try
+            {
+                if (!this.checkApiKeys())
+                    return this.ResponseMessage(new HttpResponseMessage(HttpStatusCode.Unauthorized) { ReasonPhrase = "apikey non fornita o non valida" });
+
+                var tSched = this.Slot.LoadObjNullByPK<TaskSchedulazionePiano>(planId);
+
+                if (tSched == null)
+                    this.NotFound();
+
+                TaskEsecuzione exec = null;
+
+                if (tSched.StatoEsecuzioneId.OpIN(EStatoEsecuzione.PS_InEsecuzione,
+                    EStatoEsecuzione.PS_TerminatoConSuccesso,
+                    EStatoEsecuzione.PS_TerminatoConErrori))
+                {
+                    exec = Slot.LoadObjNullByFILTER<TaskEsecuzione>(Filter.Eq(nameof(TaskEsecuzione.SchedPianoId), tSched.Id));
+                }
+
+                if (exec == null)
+                    return this.Content(HttpStatusCode.NotFound, @"Dati di esecuzione non presenti");
+
+                var logs = this.Slot.CreateList<TaskFileLista>().SearchByColumn(Filter.Eq(nameof(TaskFile.TaskEsecuzioneId), exec.Id)
+                                                                                .And(Filter.Eq(nameof(TaskFile.TipoFileId), 1)));
+
+                if (logs.Count == 0)
+                    return this.Content(HttpStatusCode.NotFound, @"Log non presente. Se il task e' ancora in esecuzione il log non e' disponibile.");
+
+                return this.Content(HttpStatusCode.OK, Encoding.UTF8.GetString(logs.FirstOrDefault().FileData));
+            }
+            catch (Exception e)
+            {
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Error, $"    -> error: {e.Message}");
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Error, $"{e.StackTrace}");
+                return this.InternalServerError(e);
+            }
+            finally
+            {
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"End API Call -> status {planId}");
+            }
+
+        }
+
+
     }
 }
