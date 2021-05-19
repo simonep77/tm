@@ -133,18 +133,7 @@ namespace TaskManagement.BIZ.src
                         rtParam.ValoreOpzionale = paramCondiviso.ValoreOpzionale;
 
                     }
-                    else
-                    {
-                        //Qui in caso di esecuzione pianificata potrebbero essere passati parametri di override
-                        if (this.IsRunningUnderSchedule)
-                        {
-                            if (!string.IsNullOrWhiteSpace(this.mPianoSched.JsonParametriOverride))
-                            {
-                                //TDO da implementare
-                                throw new NotImplementedException("Non ancora implementato");
-                            }
-                        }
-                    }
+
                     task.Runtime.UserParams.Add(item.Chiave, rtParam);
                 }
 
@@ -163,7 +152,7 @@ namespace TaskManagement.BIZ.src
                             rtParam.Chiave = item.Key;
                             rtParam.IsVisibile = true;
                             rtParam.Valore = item.Value.ToString();
-                            task.Runtime.UserParams.Add(rtParam.Chiave, rtParam);
+                            task.Runtime.UserParams[rtParam.Chiave] = rtParam;
                         }
 
                     }
