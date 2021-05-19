@@ -55,14 +55,14 @@ namespace TaskManagement.BIZ.src
             tdefBiz.PianoSchedulazioneId = piano.Id;
 
             //Scrive avvio schedulazione
-            piano.StatoEsecuzioneId = (short)EStatoEsecuzione.PS_InEsecuzione;
+            piano.StatoEsecuzioneId = EStatoEsecuzione.PS_InEsecuzione;
             this.Slot.SaveObject(piano);
 
             //Esegue schedulazione
             tdefBiz.Run();
 
             //Scrive fine schedulazione
-            piano.StatoEsecuzioneId = tdefBiz.UltimaEsecuzione.ReturnCode == 0 ? (short)EStatoEsecuzione.PS_TerminatoConSuccesso : (short)EStatoEsecuzione.PS_TerminatoConErrori;
+            piano.StatoEsecuzioneId = tdefBiz.UltimaEsecuzione.ReturnCode == 0 ? EStatoEsecuzione.PS_TerminatoConSuccesso : EStatoEsecuzione.PS_TerminatoConErrori;
             this.Slot.SaveObject(piano);
         }
 

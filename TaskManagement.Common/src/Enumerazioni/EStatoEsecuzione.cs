@@ -1,16 +1,16 @@
 ﻿
 namespace TaskManagement.Common
 {
-    public enum EStatoEsecuzione
+    public class EStatoEsecuzione
     {
-        InEsecuzione = 1,
-        Terminato = 2,
+        public const short InEsecuzione = 1;
+        public const short Terminato = 2;
 
-        PS_Pianificato = 1001,
-        PS_InEsecuzione = 1002,
-        PS_TerminatoConSuccesso = 1003,
-        PS_TerminatoConErrori = 1004,
-        PS_Saltato = 1005
+        public const short PS_Pianificato = 1001;
+        public const short PS_InEsecuzione = 1002;
+        public const short PS_TerminatoConSuccesso = 1003;
+        public const short PS_TerminatoConErrori = 1004;
+        public const short PS_Saltato = 1005;
     }
 }
 

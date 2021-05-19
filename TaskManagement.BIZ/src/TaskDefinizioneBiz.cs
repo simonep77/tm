@@ -198,7 +198,7 @@ namespace TaskManagement.BIZ.src
         {
             this.mEsecuzione = this.Slot.CreateObject<TaskEsecuzione>();
             this.mEsecuzione.TaskDefId = this.DataObj.Id;
-            this.mEsecuzione.StatoEsecuzioneId = (short)EStatoEsecuzione.InEsecuzione;
+            this.mEsecuzione.StatoEsecuzioneId = EStatoEsecuzione.InEsecuzione;
             this.mEsecuzione.Pid = Process.GetCurrentProcess().Id.ToString();
             this.mEsecuzione.Host = Environment.MachineName;
             this.mEsecuzione.JobEsecuzioneId = this.ParentJobEsecuzioneId;//Eventuale dipendenza da job in esecuzione
@@ -218,7 +218,7 @@ namespace TaskManagement.BIZ.src
         private void esecuzioneRegistraFine(int code, string message)
         {
             this.mEsecuzione.DataTermine = DateTime.Now;
-            this.mEsecuzione.StatoEsecuzioneId = (short)EStatoEsecuzione.Terminato;
+            this.mEsecuzione.StatoEsecuzioneId = EStatoEsecuzione.Terminato;
             this.mEsecuzione.ReturnCode = code;
             this.mEsecuzione.ReturnMessage = message;
             this.Slot.SaveObject(this.mEsecuzione);
@@ -457,7 +457,7 @@ namespace TaskManagement.BIZ.src
             plNew.TaskDefId = this.DataObj.Id;
             plNew.DataEsecuzione = dtWhen;
             plNew.IsManuale = Convert.ToSByte(manuale ? 1 : 0);
-            plNew.StatoEsecuzioneId = (short)(alreadyRunning ? EStatoEsecuzione.PS_InEsecuzione : EStatoEsecuzione.PS_Pianificato);
+            plNew.StatoEsecuzioneId = (alreadyRunning ? EStatoEsecuzione.PS_InEsecuzione : EStatoEsecuzione.PS_Pianificato);
             plNew.JsonParametriOverride = jsonParametri;
             this.Slot.SaveObject(plNew);
 
@@ -534,7 +534,7 @@ namespace TaskManagement.BIZ.src
             newPlan.AddRange(nextManPlan);
 
             //Imposta le vecchie saltate
-            pastOldPlan.SetPropertyMassive(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), (short)EStatoEsecuzione.PS_Saltato);
+            pastOldPlan.SetPropertyMassive(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Saltato);
             this.Slot.SaveAll(pastOldPlan);
 
             //Elimina le schedulazioni future automatiche che non dovranno essere eseguite

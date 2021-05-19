@@ -21,7 +21,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="ApiKeys" Type="System.String" Scope="Application">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">M@st3rK3y</Value>
     </Setting>
   </Settings>
 </SettingsFile>

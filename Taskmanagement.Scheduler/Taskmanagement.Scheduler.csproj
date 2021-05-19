@@ -135,10 +135,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="src\Api\ApiDTO.cs" />
     <Compile Include="src\Api\StartupApi.cs" />
     <Compile Include="src\Api\TaskController.cs" />
     <Compile Include="src\AppContextTM.cs" />
     <Compile Include="src\Common\CostantiSched.cs" />
+    <Compile Include="src\Common\ExtentionMethods.cs" />
     <Compile Include="src\Jobs\JobResult.cs" />
     <Compile Include="src\Jobs\JobTaskRun.cs" />
     <Compile Include="src\Jobs\JobListenerTask.cs" />

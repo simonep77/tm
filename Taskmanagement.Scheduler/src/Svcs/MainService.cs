@@ -159,6 +159,14 @@ namespace Taskmanagement.Scheduler.Svcs
         #endregion
 
 
+        public void WriteLogConsole(EventLogEntryType logType, string logMessage)
+        {
+            var dtNow = DateTime.Now;
+
+            Console.Write(string.Format($"{dtNow:yyyy-MM-dd HH:mm:ss} - {Enum.GetName(typeof(EventLogEntryType), logType)} - "));
+            Console.WriteLine(logMessage);
+        }
+
         public void WriteLog(EventLogEntryType logType, string logMessage)
         {
 
@@ -168,12 +176,8 @@ namespace Taskmanagement.Scheduler.Svcs
             }
             else
             {
-                var dtNow = DateTime.Now;
-
-                Console.Write(string.Format($"{dtNow:yyyy-MM-dd HH:mm:ss} - {Enum.GetName(typeof(EventLogEntryType), logType)} - "));
-                Console.WriteLine(logMessage);
+                WriteLogConsole(logType, logMessage);
             }
-
         }
 
 

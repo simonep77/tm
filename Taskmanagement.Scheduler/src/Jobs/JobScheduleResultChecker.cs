@@ -43,7 +43,7 @@ namespace EasyReportDispatcher_SCHEDULER.src.Jobs
                             //OK, elimina
                             foreach (var item in zombies)
                             {
-                                item.StatoEsecuzioneId = (int)EStatoEsecuzione.PS_TerminatoConErrori;
+                                item.StatoEsecuzioneId = EStatoEsecuzione.PS_TerminatoConErrori;
                                 slot.SaveObject(item);
                             }
                         }

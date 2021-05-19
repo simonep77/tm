@@ -79,7 +79,7 @@ namespace Taskmanagement.Scheduler.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("M@st3rK3y")]
         public string ApiKeys {
             get {
                 return ((string)(this["ApiKeys"]));

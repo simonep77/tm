@@ -12,7 +12,10 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Taskmanagement.Scheduler.Api;
+using Taskmanagement.Scheduler.Common;
 using TaskManagement.BIZ.src;
+using TaskManagement.Common;
 using TaskManagement.DAL;
 
 namespace Taskmanagement.Scheduler.src.Api
@@ -29,10 +32,13 @@ namespace Taskmanagement.Scheduler.src.Api
 
         private bool checkApiKeys()
         {
-            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"Checking API KEY..");
+            AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"Checking apikey..");
 
             if (Debugger.IsAttached)
+            {
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"Richiesta locale, skip check");
                 return true;
+            }
 
             OwinContext owin = (OwinContext)this.Request.Properties["MS_OwinContext"];
 
@@ -45,63 +51,23 @@ namespace Taskmanagement.Scheduler.src.Api
 
             if (string.IsNullOrWhiteSpace(key))
             {
-                AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Warning, $"API KEY non fornita");
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Warning, $"API KEY non fornita");
             }
             else
             {
                 var bFound = AppContextTM.API_KEYS.Where(k => k == key).Any();
 
-                if (!bFound)
-                    AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Warning, $"API KEY {key} nessun match");
+                if (bFound)
+                {
+                    AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"Richiesta locale, skip check");
+                    return true;
+                }
+                else
+                    AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Warning, $"API KEY {key} nessun match");
             }
-
 
             return false;
         }
-
-        //[HttpPost]
-        //[HttpGet]
-        //[Route(@"api/task/{taskName}/run")]
-        //public object TaskRun(string taskName)
-        //{
-        //    AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"API Call -> run {taskName}");
-        //    try
-        //    {
-        //        if (!this.checkApiKeys())
-        //            return this.ResponseMessage(new HttpResponseMessage(HttpStatusCode.Unauthorized) { ReasonPhrase = "apikey non fornita o non valida" });
-
-
-        //        var taskDal = this.Slot.LoadObjNullByKEY<TaskDefinizione>(TaskDefinizione.KEY_NOME, taskName);
-
-        //        if (taskDal == null)
-        //            return this.NotFound();
-
-        //        var tBiz = taskDal.ToBizObject<TaskDefinizioneBiz>();
-
-
-        //        var tSched = tBiz.CreaSchedulazione(DateTime.Now, true, true);
-
-        //        AppContextTM.Service.TaskRunByPlanId(tSched.Id, false);
-
-        //        this.Slot.RefreshObject(tSched, true);
-
-        //        return new
-        //        {
-        //            RunId = tSched.Id,
-        //            StateId = tSched.StatoEsecuzioneId,
-        //            StateDesc = tSched.StatoEsecuzione.Nome,
-        //            DataEsecuzione = tSched.DataEsecuzione.ToString("yyyyMMddHHmmss"),
-        //            TaskName = tSched.Task.Nome,
-        //            TaskId = tSched.TaskDefId
-        //        };
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Error, $"API Call -> error: {e.Message}");
-        //        return this.InternalServerError(e);
-        //    }
-
-        //}
 
 
         [HttpPost]
@@ -109,7 +75,7 @@ namespace Taskmanagement.Scheduler.src.Api
         [Route(@"api/task/{taskName}/run/{when?}")]
         public object TaskSchedule(string taskName, string when = null)
         {
-            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"API Call -> run {taskName} {when}");
+            AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"Begin API Call -> run {taskName} {when}");
             try
             {
                 if (!this.checkApiKeys())
@@ -171,23 +137,26 @@ namespace Taskmanagement.Scheduler.src.Api
                     AppContextTM.Service.InternalScheduler.ReloadSchedules();
                 }
 
-                return new
+                return new TaskScheduleDTO
                 {
                     RunId = tSched.Id,
-                    StateId = tSched.StatoEsecuzioneId,
-                    StateDesc = tSched.StatoEsecuzione.Nome,
+                    StatoId = tSched.StatoEsecuzioneId,
+                    StatoDesc = tSched.StatoEsecuzione.Nome,
                     DataEsecuzione = tSched.DataEsecuzione.ToString("yyyyMMddHHmmss"),
-                    TaskName = tSched.Task.Nome,
-                    TaskId = tSched.TaskDefId
+                    TaskNome = tSched.Task.Nome,
                 };
             }
             catch (Exception e)
             {
-                AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Error, $"API Call -> error: {e.Message}");
-                AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Error, $"{e.StackTrace}");
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Error, $"    -> error: {e.Message}");
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Error, $"{e.StackTrace}");
                 return this.InternalServerError(e);
             }
-            
+            finally
+            {
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"End API Call -> run {taskName} {when}");
+            }
+
         }
 
 
@@ -195,7 +164,7 @@ namespace Taskmanagement.Scheduler.src.Api
         [Route(@"api/task/{planId}/status")]
         public object TaskStatus(long planId)
         {
-            AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Information, $"API Call -> status {planId}");
+            AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"Begin API Call -> status {planId}");
             try
             {
                 if (!this.checkApiKeys())
@@ -206,20 +175,38 @@ namespace Taskmanagement.Scheduler.src.Api
                 if (tSched == null)
                     this.NotFound();
 
-                return new
+                TaskEsecuzione exec = null;
+
+                if (tSched.StatoEsecuzioneId.OpIN(EStatoEsecuzione.PS_InEsecuzione, 
+                    EStatoEsecuzione.PS_TerminatoConSuccesso, 
+                    EStatoEsecuzione.PS_TerminatoConErrori))
+                {
+                    exec = Slot.LoadObjNullByFILTER<TaskEsecuzione>(Filter.Eq(nameof(TaskEsecuzione.SchedPianoId), tSched.Id));
+                }
+
+
+                return new TaskScheduleRunInfoDTO
                 {
                     RunId = tSched.Id,
-                    StateId = tSched.StatoEsecuzioneId,
-                    StateDesc = tSched.StatoEsecuzione.Nome,
-                    DataEsecuzione = tSched.DataEsecuzione.ToString("yyyyMMddHHmmss"),
-                    TaskName = tSched.Task.Nome,
-                    TaskId = tSched.TaskDefId
+                    StatoId = tSched.StatoEsecuzioneId,
+                    StatoDesc = tSched.StatoEsecuzione.Nome,
+                    DataEsecuzione = tSched.DataEsecuzione.ToString("yyyyMMddHHmm"),
+                    TaskNome = tSched.Task.Nome,
+                    DataAvvio = exec?.DataInserimento.ToString("yyyyMMddHHmmss") ?? string.Empty,
+                    DataTermine = exec?.DataTermine.ToString("yyyyMMddHHmmss") ?? string.Empty,
+                    ReturnCode = exec?.ReturnCode ?? 0,
+                    ReturnMessage = exec?.ReturnMessage ?? string.Empty,
                 };
             }
             catch (Exception e)
             {
-                AppContextTM.Service.WriteLog(System.Diagnostics.EventLogEntryType.Error, $"API Call -> error: {e.Message}");
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Error, $"    -> error: {e.Message}");
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Error, $"{e.StackTrace}");
                 return this.InternalServerError(e);
+            }
+            finally
+            { 
+                AppContextTM.Service.WriteLogConsole(System.Diagnostics.EventLogEntryType.Information, $"End API Call -> status {planId}");
             }
 
         }
