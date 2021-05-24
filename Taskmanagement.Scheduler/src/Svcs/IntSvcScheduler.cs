@@ -378,8 +378,13 @@ namespace Taskmanagement.Scheduler.Svcs
             await this.mScheduler.Standby();
             try
             {
-                await this.mScheduler.Clear();
+                //Cerchiamo e cancelliamo solo i job di tipo task, non quelli di sistema
+                var matcher = GroupMatcher<JobKey>.GroupContains(JOB_TASKS_GROUP);
+                var jobkeys = await this.mScheduler.GetJobKeys(matcher);
 
+                var t = this.mScheduler.DeleteJobs(jobkeys);
+
+                //Rigeneriamo il piano di esecuzione
                 using (var slot = AppContextTM.Service.CreateSlot())
                 {
 
@@ -416,7 +421,7 @@ namespace Taskmanagement.Scheduler.Svcs
                                 jobDet.JobDataMap.Add(CostantiSched.JobDataMap.Task.TaskName, task.Nome);
                                 
                                 //Schedula
-                                await this.mScheduler.ScheduleJob(jobDet, trg);
+                                var j = this.mScheduler.ScheduleJob(jobDet, trg);
 
                             }
                         }

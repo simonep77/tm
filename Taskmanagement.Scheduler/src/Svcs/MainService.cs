@@ -161,6 +161,10 @@ namespace Taskmanagement.Scheduler.Svcs
 
         public void WriteLogConsole(EventLogEntryType logType, string logMessage)
         {
+            //Se siamo in modalita' servizio e' inutile scrivre in console
+            if (this.RunMode == CostantiSched.RunMode.Service)
+                return;
+
             var dtNow = DateTime.Now;
 
             Console.Write(string.Format($"{dtNow:yyyy-MM-dd HH:mm:ss} - {Enum.GetName(typeof(EventLogEntryType), logType)} - "));

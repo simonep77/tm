@@ -489,21 +489,17 @@ namespace TaskManagement.BIZ.src
                 foreach (var dt in dates)
                 {
                     //Cerca schedulazione
-                    var sched = currPlan.Where(d => d.DataEsecuzione == dt);
+                    var sched = currPlan.Where(d => d.DataEsecuzione == dt).FirstOrDefault();
 
-                    if (sched.Any())
+                    if (sched != null)
                     {
                         //Rimuove da elenco
-                        var plExist = sched.First();
-                        newPlan.Add(plExist);
-                        currPlan.Remove(plExist);
-                        continue;
+                        newPlan.Add(sched);
+                        currPlan.Remove(sched);
                     }
+                    else //Crea nuova schedulazione
+                        newPlan.Add(this.CreaSchedulazione(dt, false, false));
 
-                    //Crea nuova schedulazione
-                    var plNew = this.CreaSchedulazione(dt, false, false);
-
-                    newPlan.Add(plNew);
                 }
             }
             else
@@ -513,21 +509,25 @@ namespace TaskManagement.BIZ.src
                     return newPlan;
             }
 
-            //Marca come saltate le schedulazioni passate non avviate (sia manuali che automatiche)
-            var pastOldPlan = currPlan.FindAllByPropertyFilter(Filter.Lt(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart));
-            //Individua le future manuali da non eliminare
-            var nextManPlan = currPlan.FindAllByPropertyFilter(Filter.Gte(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 1)));
-            //Individua le future non piu' schedulate
-            var nextOldPlan = currPlan.FindAllByPropertyFilter(Filter.Gte(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 0)));
-            //Aggiunge le manuali future alle automatiche rivalutate
-            newPlan.AddRange(nextManPlan);
+            //Gestioamo eventuali pianificazioni rimaste
+            if (currPlan.Count > 0)
+            {
+                //Marca come saltate le schedulazioni passate non avviate (sia manuali che automatiche)
+                var pastOldPlan = currPlan.FindAllByPropertyFilter(Filter.Lte(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart));
+                pastOldPlan.SetPropertyMassive(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Saltato);
+                this.Slot.SaveAll(pastOldPlan);
 
-            //Imposta le vecchie saltate
-            pastOldPlan.SetPropertyMassive(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Saltato);
-            this.Slot.SaveAll(pastOldPlan);
+                //Individua le future non piu' schedulate
+                var nextOldPlan = currPlan.FindAllByPropertyFilter(Filter.Gt(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 0)));
+                this.Slot.DeleteAll(nextOldPlan);
 
-            //Elimina le schedulazioni future automatiche che non dovranno essere eseguite
-            this.Slot.DeleteAll(nextOldPlan);
+                //Individua le future manuali da reincludere nel nuovo piano
+                var nextManPlan = currPlan.FindAllByPropertyFilter(Filter.Gt(nameof(TaskSchedulazionePiano.DataEsecuzione), dateStart).And(Filter.Eq(nameof(TaskSchedulazionePiano.IsManuale), 1)));
+                newPlan.AddRange(nextManPlan);
+
+            }
+
+
 
             //Filtriamo eventuali schedulazioni non a carico di questo nodo master
             return newPlan.Where(p => p.Task.SchedNodoId == nodoId || p.Task.SchedNodoId == 0).ToList();
