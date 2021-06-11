@@ -24,31 +24,31 @@ namespace TaskManagement.BIZ.src
                 oMsg.Body = body;
 
                 // Indirizzi
-                if (!string.IsNullOrEmpty(mailfrom))
+                if (!string.IsNullOrWhiteSpace(mailfrom))
                 {
                     oMsg.From = new System.Net.Mail.MailAddress(mailfrom);
                 }
 
-                if (!string.IsNullOrEmpty(mailto))
+                if (!string.IsNullOrWhiteSpace(mailto))
                 {
                     foreach (string sEmail in mailto.Split(ATT_MAIL_SEPS, StringSplitOptions.RemoveEmptyEntries))
                         oMsg.To.Add(new System.Net.Mail.MailAddress(sEmail));
                 }
 
-                if (!string.IsNullOrEmpty(mailcc))
+                if (!string.IsNullOrWhiteSpace(mailcc))
                 {
                     foreach (string sEmail in mailcc.Split(ATT_MAIL_SEPS, StringSplitOptions.RemoveEmptyEntries))
                         oMsg.CC.Add(new System.Net.Mail.MailAddress(sEmail));
                 }
 
-                if (!string.IsNullOrEmpty(mailbcc))
+                if (!string.IsNullOrWhiteSpace(mailbcc))
                 {
                     foreach (string sEmail in mailbcc.Split(ATT_MAIL_SEPS, StringSplitOptions.RemoveEmptyEntries))
                         oMsg.Bcc.Add(new System.Net.Mail.MailAddress(sEmail));
                 }
 
                 // Attachments
-                if (!string.IsNullOrEmpty(attachs))
+                if (!string.IsNullOrWhiteSpace(attachs))
                 {
                     foreach (string sFile in attachs.Split(ATT_SEPS, StringSplitOptions.RemoveEmptyEntries))
                         oMsg.Attachments.Add(new System.Net.Mail.Attachment(sFile));
