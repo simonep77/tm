@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TaskManagement.Interface")]
-[assembly: AssemblyCopyright("Copyright Simone Pelaia ©  2020")]
+[assembly: AssemblyCopyright("Copyright Simone Pelaia ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
