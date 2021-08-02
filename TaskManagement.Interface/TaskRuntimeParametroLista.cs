@@ -73,5 +73,14 @@ namespace TaskManagement.Interface
         {
             return this.mDiz.TryGetValue(key, out value);
         }
+
+        /// <summary>
+        /// Evitiamo il GC
+        /// </summary>
+        /// <returns></returns>
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
     }
 }

@@ -17,6 +17,11 @@ namespace TaskManagement.Interface
         protected string CurrentStep { get; private set; } = string.Empty;
         protected virtual string[] ParametriAttesi { get; set; }
 
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
+
         protected virtual bool CheckUserParams()
         {
             //Se impostati i parametri attesi allora li verifica, altrimenti torna true

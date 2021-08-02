@@ -62,6 +62,14 @@ namespace TaskManagement.Interface
             }
         }
 
+        /// <summary>
+        /// Evita il GC
+        /// </summary>
+        /// <returns></returns>
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
 
     }
 

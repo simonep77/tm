@@ -17,6 +17,15 @@ namespace TaskManagement.Interface
         public string TipoEntita { get; set; }
         public string Testo { get; set; }
 
+        /// <summary>
+        /// Evitiamo il GC
+        /// </summary>
+        /// <returns></returns>
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
+
     }
 
 }

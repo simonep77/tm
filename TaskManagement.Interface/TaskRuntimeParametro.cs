@@ -14,6 +14,14 @@ namespace TaskManagement.Interface
         public bool IsCondiviso { get; set; }
         public bool IsOverride { get; set; }
 
+        /// <summary>
+        /// Evitiamo il GC
+        /// </summary>
+        /// <returns></returns>
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
 
     }
 }
