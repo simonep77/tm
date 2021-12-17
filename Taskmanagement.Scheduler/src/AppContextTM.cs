@@ -21,7 +21,7 @@ namespace Taskmanagement.Scheduler
         public static readonly string SCHEDULE_EXTEND_PLAN_CRONSTRING = @"0 7 0 ? * * *";
         public static readonly int SCHEDULE_FORCED_UPDATE_CHECK_SECONDS = Settings.Default.SecondiCheckModificheSchedulazioni;
         public static readonly int SCHEDULE_RESULT_CHECK_MINUTES = 10;
-        public static readonly int SCHEDULE_EXECUTION_PLAN_DAYS = 2;
+        public static readonly int SCHEDULE_EXECUTION_PLAN_DAYS = Settings.Default.NumeroGiorniPianoEsecuzione;
         public static readonly bool SCHEDULE_MASTER_NODE = Settings.Default.MasterNode;
         public static readonly bool API_ENABLED = Settings.Default.ApiEnabled;
         public static readonly string API_BINDING_ADDRESS = Settings.Default.ApiBindingAddress;

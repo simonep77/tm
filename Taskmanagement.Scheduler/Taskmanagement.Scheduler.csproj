@@ -52,10 +52,10 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>62B75D3CF998A2F78C44C4898742B88C60BA5B77</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>B62FAF9D0102B541912328ACD9C2C381DA9D7A4D</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>Taskmanagement.Scheduler_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Taskmanagement.Scheduler_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -184,7 +184,7 @@
     <Content Include="Service_Uninstall.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Taskmanagement.Scheduler_TemporaryKey.pfx" />
+    <None Include="Taskmanagement.Scheduler_1_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

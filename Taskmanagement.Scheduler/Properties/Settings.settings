@@ -23,5 +23,8 @@
     <Setting Name="ApiKeys" Type="System.String" Scope="Application">
       <Value Profile="(Default)">M@st3rK3y</Value>
     </Setting>
+    <Setting Name="NumeroGiorniPianoEsecuzione" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">7</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

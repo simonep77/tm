@@ -53,10 +53,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>77587FC52BE6D7B5606235D45FD29126F35941E9</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>4F8BFADC2CF9D1186695225A9E81886B753D7BA7</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>TaskManagement.Worker_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>TaskManagement.Worker_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -113,7 +113,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="TaskManagement.Worker_TemporaryKey.pfx" />
+    <None Include="TaskManagement.Worker_1_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
