@@ -59,10 +59,19 @@ namespace TaskManagement.BIZ.src
             this.Slot.SaveObject(piano);
 
             //Esegue schedulazione
-            tdefBiz.Run();
+            try
+            {
+                tdefBiz.Run();
 
-            //Scrive fine schedulazione
-            piano.StatoEsecuzioneId = tdefBiz.UltimaEsecuzione.ReturnCode == 0 ? EStatoEsecuzione.PS_TerminatoConSuccesso : EStatoEsecuzione.PS_TerminatoConErrori;
+                //Scrive fine schedulazione
+                piano.StatoEsecuzioneId = tdefBiz.UltimaEsecuzione.ReturnCode == 0 ? EStatoEsecuzione.PS_TerminatoConSuccesso : EStatoEsecuzione.PS_TerminatoConErrori;
+            }
+            catch (Exception)
+            {
+                piano.StatoEsecuzioneId = EStatoEsecuzione.PS_TerminatoConErrori;
+                throw;
+            }
+            
             this.Slot.SaveObject(piano);
         }
 

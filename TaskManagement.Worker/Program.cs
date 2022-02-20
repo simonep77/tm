@@ -47,7 +47,13 @@ namespace TaskManagement.Worker
             catch (Exception ex)
             {
                 printUsage();
-                printException(ex);
+
+                while (ex != null)
+                {
+                    printException(ex);
+                    ex = ex.InnerException;
+                }
+
 
                 Environment.ExitCode = 1;
             }

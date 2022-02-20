@@ -163,6 +163,10 @@
       <Project>{e425a3ab-0b56-468b-a87d-32a6eed3c58a}</Project>
       <Name>TaskManagement.DAL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TaskManagement.Interface\TaskManagement.Interface.csproj">
+      <Project>{7977e313-49a4-4f79-abbe-a8fda1ecee88}</Project>
+      <Name>TaskManagement.Interface</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TaskManagement.Worker\TaskManagement.Worker.csproj">
       <Project>{ecc80031-8d3d-4d0f-a8f3-3e9267e9f100}</Project>
       <Name>TaskManagement.Worker</Name>
