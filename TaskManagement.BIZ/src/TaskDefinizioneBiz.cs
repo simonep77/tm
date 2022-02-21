@@ -470,21 +470,21 @@ namespace TaskManagement.BIZ.src
                 .SearchByColumn(Filter.Eq(nameof(TaskSchedulazionePiano.TaskDefId), this.DataObj.Id)
                 .And(Filter.Eq(nameof(TaskSchedulazionePiano.StatoEsecuzioneId), EStatoEsecuzione.PS_Pianificato)));
 
-            var dateStart = DateTime.Now;
+            //Se siamo in esecuzione slave ritorniamo solo le schedulazioni di competenza del nodo
+            if (!isMaster)
+                return currPlan.Where(p => p.Task.SchedNodoId == nodoId).ToList();
 
+            var dateStart = DateTime.Now;
             var newPlan = new List<TaskSchedulazionePiano>();
 
             //Verifichiamo la stringa cron di schedulazione e controlliamo le schedulazioni esistenti
-            if (!string.IsNullOrWhiteSpace(this.DataObj.SchedCronString))
+            if (!string.IsNullOrWhiteSpace(this.DataObj.SchedCronString) && this.DataObj.Attivo > 0)
             {
                 var cronExpr = NCrontab.Advanced.CrontabSchedule.Parse(this.DataObj.SchedCronString);
 
-
                 var dates = cronExpr.GetNextOccurrences(dateStart, planDateEnd);
 
-                //Se siamo in esecuzione slave ritorniamo solo le schedulazioni di competenza del nodo
-                if (!isMaster)
-                    return currPlan.Where(p => p.Task.SchedNodoId == nodoId).ToList();
+
 
                 //Verifico esistenza match piano gia' creato che non verra' modificato
                 foreach (var dt in dates)
@@ -510,7 +510,7 @@ namespace TaskManagement.BIZ.src
                     return newPlan;
             }
 
-            //Gestioamo eventuali pianificazioni rimaste
+            //Gestiamo eventuali pianificazioni rimaste
             if (currPlan.Count > 0)
             {
                 //Marca come saltate le schedulazioni passate non avviate (sia manuali che automatiche)
@@ -527,8 +527,6 @@ namespace TaskManagement.BIZ.src
                 newPlan.AddRange(nextManPlan);
 
             }
-
-
 
             //Filtriamo eventuali schedulazioni non a carico di questo nodo master
             return newPlan.Where(p => p.Task.SchedNodoId == nodoId || p.Task.SchedNodoId == 0).ToList();
