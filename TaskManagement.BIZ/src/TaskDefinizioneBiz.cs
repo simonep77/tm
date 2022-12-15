@@ -204,12 +204,12 @@ namespace TaskManagement.BIZ.src
         /// <summary>
         /// Registra avvio esecuzione
         /// </summary>
-        private void esecuzioneRegistraFine(int code, string message)
+        private void esecuzioneRegistraFine(ITaskTM task)
         {
             this.mEsecuzione.DataTermine = DateTime.Now;
-            this.mEsecuzione.StatoEsecuzioneId = code == 0 ? EStatoEsecuzione.Terminato : EStatoEsecuzione.TerminatoErrore;
-            this.mEsecuzione.ReturnCode = code;
-            this.mEsecuzione.ReturnMessage = message;
+            this.mEsecuzione.StatoEsecuzioneId = task.Runtime.TaskLastReturnCode == 0 ? EStatoEsecuzione.Terminato : EStatoEsecuzione.TerminatoErrore;
+            this.mEsecuzione.ReturnCode = task.Runtime.TaskLastReturnCode;
+            this.mEsecuzione.ReturnMessage = task.Runtime.TaskLastMessage;
             this.Slot.SaveObject(this.mEsecuzione);
         }
 
@@ -397,17 +397,23 @@ namespace TaskManagement.BIZ.src
                     //Esegue codice Task
                     task.Execute();
                     //Imposta output
-                    retCode = (int)task.Runtime.TaskLastReturnCode;
-                    retMsg = task.Runtime.TaskLastMessage;
+
+                    //Se il return code è errato
+                    if (task.Runtime.TaskLastReturnCode == 0 && task.Runtime.HaSegnalazioniErrore)
+                    {
+                        task.Runtime.TaskLastReturnCode = 1;
+                        task.Runtime.TaskLastMessage = @"SEG";
+                    }
                 }
                 catch (Exception e)
                 {
-                    retCode = -99;
-                    retMsg = e.ToString();
+                    task.Runtime.TaskLastReturnCode = -99;
+                    task.Runtime.TaskLastMessage = e.ToString();
                 }
                 finally
                 {
-                    this.esecuzioneRegistraFine(retCode, retMsg);
+                    
+                    this.esecuzioneRegistraFine(task);
                 }
 
                 //Esegue notifica email
