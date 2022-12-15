@@ -207,7 +207,7 @@ namespace TaskManagement.BIZ.src
         private void esecuzioneRegistraFine(int code, string message)
         {
             this.mEsecuzione.DataTermine = DateTime.Now;
-            this.mEsecuzione.StatoEsecuzioneId = EStatoEsecuzione.Terminato;
+            this.mEsecuzione.StatoEsecuzioneId = code == 0 ? EStatoEsecuzione.Terminato : EStatoEsecuzione.TerminatoErrore;
             this.mEsecuzione.ReturnCode = code;
             this.mEsecuzione.ReturnMessage = message;
             this.Slot.SaveObject(this.mEsecuzione);
@@ -267,16 +267,14 @@ namespace TaskManagement.BIZ.src
                 //Invia
                 Mailer.Send(this.DataObj.MailFROM, this.DataObj.MailTO, this.DataObj.MailCC, this.DataObj.MailBCC, subj, body, sbLogs.ToString());
 
+                this.mEsecuzione.NotificaCode = 0;
+                this.mEsecuzione.NotificaMessage = "OK";
+
             }
             catch (Exception e)
             {
                 this.mEsecuzione.NotificaCode = -1;
                 this.mEsecuzione.NotificaMessage = e.Message;
-            }
-            finally
-            {
-                this.mEsecuzione.ReturnCode = 0;
-                this.mEsecuzione.ReturnMessage = "OK"; //A chi?
             }
 
             this.Slot.SaveObject(this.mEsecuzione);

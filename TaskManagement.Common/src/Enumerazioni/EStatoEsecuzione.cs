@@ -5,6 +5,7 @@ namespace TaskManagement.Common
     {
         public const short InEsecuzione = 1;
         public const short Terminato = 2;
+        public const short TerminatoErrore = 3;
 
         public const short PS_Pianificato = 1001;
         public const short PS_InEsecuzione = 1002;
