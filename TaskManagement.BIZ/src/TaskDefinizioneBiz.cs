@@ -355,7 +355,7 @@ namespace TaskManagement.BIZ.src
                     domSetup.ApplicationName = this.DataObj.TaskClass;
                     domSetup.PrivateBinPath = domSetup.ApplicationBase;
                     domSetup.ShadowCopyFiles = @"true";
-                    domSetup.ConfigurationFile = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+                    domSetup.ConfigurationFile = string.Concat(this.DataObj.AssemblyPath, ".config");
                     //domSetup.ShadowCopyDirectories = "";
 
                     var appDom = AppDomain.CreateDomain(@"tmDomain", null, domSetup);
